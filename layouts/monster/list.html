@@ -6,7 +6,7 @@
   {{ range sort .Pages ".Params.id" "asc"}}
   <a href="{{ .RelPermalink }}" class="monster-card">
     {{ with .Params.image }}
-      <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+      <img src="{{ . | absURL }}" alt="{{ $.Title }}">
     {{ end }}
     <div class="monster-card-body">
       <h2>{{ .Title }}</h2>

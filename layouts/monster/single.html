@@ -5,7 +5,7 @@
   <!-- 画像 -->
   {{ with .Params.image }}
     <div class="monster-image">
-      <img src="{{ . | relURL }}" alt="{{ $.Title }}">
+      <img src="{{ . | absURL }}" alt="{{ $.Title }}">
     </div>
   {{ end }}
 

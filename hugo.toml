@@ -1,7 +1,8 @@
-baseURL = "/"
+baseURL = "/miko-onceworld-site/"
 publishDir = "docs"
-relativeURLs = false
-canonifyURLs = true
+relativeURLs = true
+canonifyURLs = false
+
 
 languageCode = "ja-jp"
 title = 'OnceWorld(ワンスワ)miko'

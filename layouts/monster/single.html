@@ -5,7 +5,7 @@
   <!-- 画像 -->
   {{ with .Params.image }}
     <div class="monster-image">
-      <img src="{{ . | absURL }}" alt="{{ $.Title }}">
+      <img src="{{ . | relURL }}" alt="{{ $.Title }}">
     </div>
   {{ end }}
 
@@ -13,7 +13,7 @@
   <!-- ステータス -->
   <section class="monster-stats">
     <!-- 名前+簡易情報 -->
-  <p><secsion class="monster_name">名前:</secsion>
+  <p><section class="monster_name">名前:</section>
     <span class="monster_name_physic">{{ .Title}}</span>
     ({{ .Params.attack_type}}・{{ .Params.attack_range}}・{{ .Params.element}})
   </p>
@@ -107,11 +107,11 @@
 </section>
 {{ end }}
 
-<script src="/js/status-calc.js"></script>
+<script src="{{ "js/status-calc.js" | relURL }}"></script>
 
   <!-- ページナビ -->
 
-  <p><a href="/monster/">一覧に戻る</a></p>
+  <p><a href="{{ "/monster/" | relURL }}">一覧に戻る</a></p>
 
 </article>
 {{ end }}

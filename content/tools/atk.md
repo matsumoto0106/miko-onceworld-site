@@ -43,7 +43,6 @@ description: "与ダメージを計算するツールです。"
 document.getElementById("calc-btn").addEventListener("click", function () {
   const atk = Number(document.getElementById("atk").value);
   const def = Number(document.getElementById("def").value);
-  const rate = Number(document.getElementById("rate").value);
 
   const damage = Math.max(0, Math.floor((atk - def) * (rate / 100)));
 

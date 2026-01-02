@@ -2,9 +2,6 @@
 title: "与ダメージ計算"
 description: "与ダメージを計算するツールです。"
 ---
-
-与ダメージを計算するツールです。
-
 <hr>
 
 <section class="atk-tool">

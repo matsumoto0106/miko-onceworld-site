@@ -556,43 +556,20 @@
 </section>
 <script src="https://matsumoto0106.github.io/miko-onceworld-site/js/atk-calc.js"></script>
 <script>
-document.getElementById("calc-btn").addEventListener("click", function () {
-  const atk = Number(document.getElementById("atk").value);
-  const def = Number(document.getElementById("def").value);
+document.addEventListener("DOMContentLoaded", () => {
+  const selectEl = document.getElementById("monster-select");
+  const defEl = document.getElementById("def");
 
-  const damage = Math.max(0, atk - def ));
+  if (!selectEl || !defEl) return;
 
-  document.getElementById("result").textContent = damage;
-});
-  document.getElementById("monster-select").addEventListener("change", function () {
-  const selected = this.options[this.selectedIndex];
-  const defValue = selected.value;
+  selectEl.addEventListener("change", () => {
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const def = Number(opt.dataset.def || opt.value || 0);
 
-  if (defValue !== "") {
-    document.getElementById("def").value = defValue;
-  }
-});
-  let baseDef = 0;
-
-function recalcMonsterDef() {
-  const level = Number(document.getElementById("monster-level").value);
-  if (baseDef === 0) return;
-
-  // ステータス上昇の計算式
-  const calculatedDef = Math.floor(baseDef * ( 1 + (level - 1 ) * 0.1)) ;
-  document.getElementById("def").value = calculatedDef;
-}
-
-document.getElementById("monster-select").addEventListener("change", function () {
-  const selected = this.options[this.selectedIndex];
-  baseDef = Number(selected.dataset.def || 0);
-
-  document.getElementById("monster-level").value = 1;
-  recalcMonsterDef();
-});
-
-document.getElementById("monster-level").addEventListener("input", function () {
-  recalcMonsterDef();
+    if (!Number.isNaN(def) && def > 0) {
+      defEl.value = def;
+    }
+  });
 });
 </script>
 

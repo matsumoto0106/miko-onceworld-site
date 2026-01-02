@@ -68,7 +68,7 @@ function recalcMonsterDef() {
   if (baseDef === 0) return;
 
   // ステータス上昇の計算式
-  const calculatedDef = baseDef * ( 1 + level * 0.1) ;
+  const calculatedDef = Math.floor(baseDef * ( 1 + level * 0.1)) ;
   document.getElementById("def").value = calculatedDef;
 }
 

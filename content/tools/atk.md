@@ -11,7 +11,16 @@ description: "与ダメージを計算するツールです。"
 <label>
   モンスター選択：
 {{< monster_select >}}
-  
+  <label>
+  モンスターレベル：
+  <input
+    type="number"
+    id="monster-level"
+    value="1"
+    min="1"
+  >
+</label>
+
 </label>
   <div class="atk-form">
     <label>

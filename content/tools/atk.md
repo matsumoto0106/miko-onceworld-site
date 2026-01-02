@@ -54,7 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const lv = Math.max(1, Number(levelEl.value || 1));
     if (!baseDef) return;
 
-    const calculatedDef = baseDef + (lv - 1) * DEF_GROWTH_PER_LEVEL;
+    const calculatedDef = Math.floor(baseDef * (1 + (lv - 1) * 0.1));
+
     defEl.value = calculatedDef;
   }
 

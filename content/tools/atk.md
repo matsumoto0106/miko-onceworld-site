@@ -57,4 +57,12 @@ document.getElementById("calc-btn").addEventListener("click", function () {
 
   document.getElementById("result").textContent = damage;
 });
+  document.getElementById("monster-select").addEventListener("change", function () {
+  const selected = this.options[this.selectedIndex];
+  const defValue = selected.value;
+
+  if (defValue !== "") {
+    document.getElementById("def").value = defValue;
+  }
+});
 </script>

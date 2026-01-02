@@ -6,3 +6,8 @@ canonifyURLs = true
 
 languageCode = "ja-jp"
 title = 'OnceWorld(ワンスワ)miko'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

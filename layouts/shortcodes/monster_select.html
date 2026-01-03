@@ -3,13 +3,10 @@
 
   {{ range site.RegularPages }}
     {{ if in .File.Path "monster/" }}
-      <option
-        value="{{ .Params.def }}"
-        data-def="{{ .Params.def }}"
-        data-mdef="{{ .Params.mdef }}"
-      >
+      <option value="{{ .Params.def }}|{{ .Params.mdef }}">
         {{ .Title }}
       </option>
     {{ end }}
   {{ end }}
+
 </select>

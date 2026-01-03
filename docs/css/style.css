@@ -257,3 +257,33 @@ main {
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   transform: translateY(-2px);
 }
+
+/* ===== ヘッダーナビ：タップ領域拡張 ===== */
+
+/* ナビ全体 */
+.site-header nav {
+  margin-top: 8px;
+}
+
+/* リンクをブロック化して押しやすく */
+.site-header nav a {
+  display: block;
+  padding: 12px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+/* hover / tap 時の反応 */
+.site-header nav a:hover,
+.site-header nav a:active {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* スマホ向け：間隔を少し広げる */
+@media (max-width: 768px) {
+  .site-header nav a {
+    padding: 14px 18px;
+  }
+}

@@ -623,10 +623,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const def  = scaleByLevel(baseDef, lv);
   const mdef = scaleByLevel(baseMdef, lv);
   const vit  = scaleByLevel(baseVit, lv);
+  const vitDisplayValue = vit * 18 + 100;
 
-  defEl.value  = def;
+  defEl.value = def;
   mdefEl.value = mdef;
-  vitDisplayEl.textContent = vit;
+  vitDisplayEl.textContent = vitDisplayValue;
 }
 
   // 正式ダメージ（乱数は後回し：r=1.0で表示）

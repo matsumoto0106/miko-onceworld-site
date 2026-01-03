@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultEl  = document.getElementById("result");
   const minlineEl = document.getElementById("minline");
   const calcBtn   = document.getElementById("calc-btn");
-
   if (!selectEl || !levelEl || !atkEl || !intEl || !defEl || !mdefEl || !resultEl || !minlineEl || !calcBtn) return;
 
   // モンスター基礎値（Lv1）
@@ -77,11 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function scaleByLevel(base, lv) {
     return Math.floor(base * (1 + (lv - 1) * 0.1));
   }
-
   function getLv() {
     return Math.max(1, Number(levelEl.value || 1));
   }
-
   function getAttackType() {
     const checked = document.querySelector('input[name="attack-type"]:checked');
     return checked ? checked.value : "phys";
@@ -109,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const raw = (atk * 1.75 - (def + mdef / 10)) * 4 * r;
     return Math.max(0, Math.floor(raw));
   }
-
   function calcMagicDamage(intv, def, mdef, r = 1.0) {
     const raw = (intv * 1.26 - (mdef + def / 10)) * 4 * r;
     return Math.max(0, Math.floor(raw));
@@ -121,13 +117,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const need = (1 / (4 * r)) + (def + mdef / 10);
     return Math.ceil(need / 1.75);
   }
-
   function minIntLine(def, mdef) {
     const r = 0.9;
     const need = (1 / (4 * r)) + (mdef + def / 10);
     return Math.ceil(need / 1.26);
   }
-
   function updateMinLine() {
     const type = getAttackType();
     const def  = Number(defEl.value || 0);
@@ -138,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
       minlineEl.textContent = `確実に1以上出る最低INT：${minIntLine(def, mdef)}`;
     }
   }
-
   function onMonsterOrLevelChanged() {
     loadMonsterBases();
     recalcMonsterStats();
@@ -150,16 +143,13 @@ document.addEventListener("DOMContentLoaded", () => {
     levelEl.value = 1; // モンスター切替時はLv1に戻す（不要なら削除OK）
     onMonsterOrLevelChanged();
   });
-
   levelEl.addEventListener("input", () => {
     recalcMonsterStats();
     updateMinLine();
   });
-
   document.querySelectorAll('input[name="attack-type"]').forEach(radio => {
     radio.addEventListener("change", updateMinLine);
   });
-
   calcBtn.addEventListener("click", () => {
     const type = getAttackType();
     const atk  = Number(atkEl.value || 0);

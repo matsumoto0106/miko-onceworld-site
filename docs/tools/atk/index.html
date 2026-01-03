@@ -592,8 +592,15 @@ return checked ? checked.value : &ldquo;phys&rdquo;;
 <p>// select の data-* から基礎DEF/MDEFを読む
 function loadMonsterBases() {
 const opt = selectEl.options[selectEl.selectedIndex];
-baseDef  = Number(opt?.dataset?.def  ?? opt?.value ?? 0);
-baseMdef = Number(opt?.dataset?.mdef ?? 0);
+const v = (opt?.value || &ldquo;&rdquo;).trim(); // &ldquo;def|mdef&rdquo; のはず</p>
+<p>if (!v || !v.includes(&quot;|&quot;)) {
+baseDef = 0;
+baseMdef = 0;
+return;
+}</p>
+<p>const [defStr, mdefStr] = v.split(&quot;|&quot;);
+baseDef = Number(defStr || 0);
+baseMdef = Number(mdefStr || 0);
 }</p>
 <p>// DEF/MDEF をレベル反映して入力欄へ
 function recalcMonsterStats() {

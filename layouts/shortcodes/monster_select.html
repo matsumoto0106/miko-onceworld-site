@@ -1,7 +1,13 @@
-{{ range sort site.RegularPages ".Params.id" "asc" }}
-  {{ if in .File.Path "monster/" }}
-    <option value="{{ .Params.def }}|{{ .Params.mdef }}|{{ .Params.vit }}">
-      {{ .Title }}
-    </option>
+<select id="monster-select">
+  <option value="">-- 選択してください --</option>
+
+  {{ $monsters := where site.RegularPages "Section" "monster" }}
+  {{ range sort $monsters ".Params.id" "asc" }}
+    {{ if .Params.id }}
+      <option value="{{ .Params.def }}|{{ .Params.mdef }}|{{ .Params.vit }}">
+        [{{ printf "%03d" .Params.id }}] {{ .Title }}
+      </option>
+    {{ end }}
   {{ end }}
-{{ end }}
+
+</select>

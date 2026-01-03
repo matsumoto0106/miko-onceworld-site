@@ -51,7 +51,7 @@ title: "与ダメージ計算"
   </div>
 
   <div class="atk-result">
-    <p>対象モンスターVIT（レベル反映）：<span id="vit-display">---</span></p>
+    <p>対象モンスターの体力（レベル反映）：<span id="vit-display">---</span></p>
     <p>与ダメージ：<span id="result">---</span></p>
     <p id="minline">最低ライン：---</p>
 </section>

@@ -50,7 +50,6 @@ title: "与ダメージ計算"
       <label for="mdef">MDEF：</label>
       <input type="number" id="mdef" value="0" min="0">
     </div>
-
     <button id="calc-btn">計算する</button>
   </div>
 

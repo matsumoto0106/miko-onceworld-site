@@ -186,11 +186,12 @@ main {
     padding: 10px 14px;
   }
 }
+
 /* =================================================
-   Nav link color fix (keep blue even after click)
+   Nav link color FIX (keep blue even after click)
+   - ヘッダーのナビはクリック後も色を変えない
 ================================================= */
 
-/* ナビリンク：すべての状態で同じ色に固定 */
 .site-nav a,
 .site-nav a:link,
 .site-nav a:visited,
@@ -200,8 +201,10 @@ main {
   color: #2b6cb0 !important;
   text-decoration: none;
 }
+
 /* =================================================
-   List page (cards) – minimal
+   List page (cards) for layouts/_default/list.html
+   - ホームの「ツール」「モンスター一覧」等も含む
 ================================================= */
 
 .db-list {
@@ -222,18 +225,18 @@ main {
   font-size: 1.05em;
 }
 
-/* 一覧リンク：visitedでも色を変えない */
-.db-card-title a,
-.db-card-title a:link,
-.db-card-title a:visited,
-.db-card-title a:hover,
-.db-card-title a:active,
-.db-card-title a:focus {
-  color: #2b6cb0;
+/* 一覧カード内リンク：visitedでも色を変えない（強制） */
+.db-card a,
+.db-card a:link,
+.db-card a:visited,
+.db-card a:hover,
+.db-card a:active,
+.db-card a:focus {
+  color: #2b6cb0 !important;
   text-decoration: none;
 }
 
-.db-card-title a:hover {
+.db-card a:hover {
   text-decoration: underline;
 }
 

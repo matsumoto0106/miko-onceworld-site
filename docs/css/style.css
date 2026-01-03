@@ -1,21 +1,16 @@
-/* ===== Mobile First UI ===== */
+/* ===== Header Links : Mobile First ===== */
 
-/* リンク基本 */
-a {
-  text-decoration: none;
+/* サイトタイトル（例外） */
+.site-header .site-title a {
   color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 700;
 }
 
-/* ===== ヘッダーナビ ===== */
-.site-header nav {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ナビリンク（タイトル以外） */
-.site-header nav a {
+/* ヘッダー内リンク（タイトル以外） */
+.site-header > a {
   display: block;
   padding: 14px 16px;
   border-radius: 12px;
@@ -23,31 +18,25 @@ a {
   background: #eef5ff;
   color: #2b6cb0;
   font-weight: 600;
+  text-decoration: none;
 
   border: 1px solid #d6e4ff;
 }
 
 /* タップ時 */
-.site-header nav a:active {
+.site-header > a:active {
   background: #dbeafe;
 }
 
-/* サイトタイトルは完全に例外 */
-.site-title a {
-  color: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-}
-
-/* ===== PCはあとから足す ===== */
+/* PCで横並び */
 @media (min-width: 769px) {
-  .site-header nav {
-    flex-direction: row;
+  .site-header {
+    display: flex;
+    align-items: center;
     gap: 12px;
   }
 
-  .site-header nav a {
+  .site-header > a {
     padding: 10px 14px;
   }
 }

@@ -2,7 +2,8 @@
 title: "ペット与ダメージ計算"
 ---
 
-ペットの与ダメージを計算するツールです（攻撃値は手入力）。
+ペットの与ダメージを計算します（攻撃値は手入力）。  
+※ペットはモンスター一覧と同じ候補から選びます。
 
 <hr>
 
@@ -13,35 +14,35 @@ title: "ペット与ダメージ計算"
 
   <div class="form-row">
       <label for="pet-select">ペット選択：</label>
-      {{< pet_select >}}
+      {{< monster_select_custom id="pet-select" >}}
   </div>
 
   <div class="form-row">
-      <span>並び順：</span>
-      <label><input type="radio" name="pet-sort" value="id" checked> 図鑑番号</label>
-      <label><input type="radio" name="pet-sort" value="kana"> 五十音</label>
-  </div>
-
-  <div class="form-row">
-      <span>攻撃タイプ：</span>
+      <label>ペット攻撃タイプ：</label>
       <strong><span id="pet-type">---</span></strong>
   </div>
 
   <div class="form-row">
-      <label for="pet-atk">ペットATK（物理用）：</label>
+      <label for="pet-atk">ATK（物理用）：</label>
       <input type="number" id="pet-atk" value="0" min="0">
   </div>
 
   <div class="form-row">
-      <label for="pet-int">ペットINT（魔法用）：</label>
+      <label for="pet-int">INT（魔法用）：</label>
       <input type="number" id="pet-int" value="0" min="0">
   </div>
 
   <hr>
 
   <div class="form-row">
-      <label for="monster-select">モンスター選択：</label>
-      {{< monster_select >}}
+      <span>並び順：</span>
+      <label><input type="radio" name="sort-mode" value="id" checked> 図鑑番号</label>
+      <label><input type="radio" name="sort-mode" value="kana"> 五十音</label>
+  </div>
+
+  <div class="form-row">
+      <label for="monster-select">攻撃対象モンスター：</label>
+      {{< monster_select_custom id="monster-select" >}}
   </div>
 
   <div class="form-row">
@@ -60,7 +61,7 @@ title: "ペット与ダメージ計算"
   </div>
 
   <div class="form-row">
-      <label for="vit-display">対象モンスター体力（レベル反映）：</label>
+      <label>対象モンスター体力（レベル反映）：</label>
       <span id="vit-display">---</span>
   </div>
 
@@ -74,14 +75,14 @@ title: "ペット与ダメージ計算"
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // --- 要素取得 ---
   const petSelectEl = document.getElementById("pet-select");
-  const petAtkEl = document.getElementById("pet-atk");
-  const petIntEl = document.getElementById("pet-int");
-  const petTypeEl = document.getElementById("pet-type");
-
   const monsterSelectEl = document.getElementById("monster-select");
   const levelEl = document.getElementById("monster-level");
+
+  const petTypeEl = document.getElementById("pet-type");
+  const petAtkEl = document.getElementById("pet-atk");
+  const petIntEl = document.getElementById("pet-int");
+
   const defEl = document.getElementById("def");
   const mdefEl = document.getElementById("mdef");
   const vitDisplayEl = document.getElementById("vit-display");
@@ -89,40 +90,49 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultEl = document.getElementById("result");
   const calcBtn = document.getElementById("calc-btn");
 
-  if (!petSelectEl || !petAtkEl || !petIntEl || !petTypeEl ||
-      !monsterSelectEl || !levelEl || !defEl || !mdefEl || !vitDisplayEl ||
+  if (!petSelectEl || !monsterSelectEl || !levelEl ||
+      !petTypeEl || !petAtkEl || !petIntEl ||
+      !defEl || !mdefEl || !vitDisplayEl ||
       !resultEl || !calcBtn) return;
 
-  // --- モンスター基礎値（Lv1） ---
-  let baseDef = 0;
-  let baseMdef = 0;
-  let baseVit = 0;
-
+  // --- ユーティリティ ---
   function scaleByLevel(base, lv) {
     return Math.floor(base * (1 + (lv - 1) * 0.1));
   }
-
   function getLv() {
     return Math.max(1, Number(levelEl.value || 1));
   }
 
-  // monster_select は value="def|mdef|vit" 方式の前提
-  function loadMonsterBases() {
-    const opt = monsterSelectEl.options[monsterSelectEl.selectedIndex];
+  // option.value = "def|mdef|vit|attack_type"
+  function parseMonsterOption(selectEl) {
+    const opt = selectEl.options[selectEl.selectedIndex];
     const v = (opt?.value || "").trim();
+    if (!v.includes("|")) return null;
 
-    if (!v.includes("|")) {
+    const [defStr, mdefStr, vitStr, atkType] = v.split("|");
+    return {
+      def: Number(defStr || 0),
+      mdef: Number(mdefStr || 0),
+      vit: Number(vitStr || 0),
+      attackType: (atkType || "").trim() // "物理" or "魔法"（ペット判定にも使用）
+    };
+  }
+
+  // --- 対象モンスター：DEF/MDEF/VIT 自動反映 ---
+  let baseDef = 0, baseMdef = 0, baseVit = 0;
+
+  function loadTargetBases() {
+    const data = parseMonsterOption(monsterSelectEl);
+    if (!data) {
       baseDef = 0; baseMdef = 0; baseVit = 0;
       return;
     }
-
-    const [defStr, mdefStr, vitStr] = v.split("|");
-    baseDef = Number(defStr || 0);
-    baseMdef = Number(mdefStr || 0);
-    baseVit = Number(vitStr || 0);
+    baseDef = data.def;
+    baseMdef = data.mdef;
+    baseVit = data.vit;
   }
 
-  function recalcMonsterStats() {
+  function recalcTargetStats() {
     const lv = getLv();
     if (!baseDef && !baseMdef && !baseVit) return;
 
@@ -132,17 +142,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     defEl.value = def;
     mdefEl.value = mdef;
-
-    // 体力表示は “vit*18+100” 仕様
-    vitDisplayEl.textContent = vit * 18 + 100;
+    vitDisplayEl.textContent = vit * 18 + 100; // 既存仕様
   }
 
-  function onMonsterOrLevelChanged() {
-    loadMonsterBases();
-    recalcMonsterStats();
+  function onTargetChanged() {
+    loadTargetBases();
+    recalcTargetStats();
   }
 
-  // --- ペット攻撃タイプ制御 ---
+  // --- ペット：攻撃タイプで入力欄を切替 ---
   function setPetType(type) {
     petTypeEl.textContent = type || "---";
 
@@ -159,26 +167,27 @@ document.addEventListener("DOMContentLoaded", () => {
       petAtkEl.value = 0;
       petAtkEl.style.opacity = "0.5";
     } else {
-      // 未選択
       petAtkEl.disabled = true;
       petIntEl.disabled = true;
-      petAtkEl.style.opacity = "0.5";
-      petIntEl.style.opacity = "0.5";
       petAtkEl.value = 0;
       petIntEl.value = 0;
+      petAtkEl.style.opacity = "0.5";
+      petIntEl.style.opacity = "0.5";
     }
   }
 
-  function getPetType() {
-    return (petSelectEl.value || "").trim(); // "物理" or "魔法"
+  function updatePetTypeFromSelection() {
+    const data = parseMonsterOption(petSelectEl);
+    const type = data ? data.attackType : "";
+    setPetType(type);
   }
 
-  // --- ペット並び替え ---
-  function sortPetOptions(mode) {
-    const currentValue = petSelectEl.value;
+  // --- 並び順：1つの切替で両方に反映 ---
+  function sortOptions(selectEl, mode) {
+    const currentValue = selectEl.value;
 
-    const placeholder = petSelectEl.options[0];
-    const opts = Array.from(petSelectEl.options).slice(1);
+    const placeholder = selectEl.options[0];
+    const opts = Array.from(selectEl.options).slice(1);
 
     opts.sort((a, b) => {
       if (mode === "id") {
@@ -190,58 +199,67 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    petSelectEl.innerHTML = "";
-    petSelectEl.appendChild(placeholder);
-    opts.forEach(o => petSelectEl.appendChild(o));
+    selectEl.innerHTML = "";
+    selectEl.appendChild(placeholder);
+    opts.forEach(o => selectEl.appendChild(o));
 
-    petSelectEl.value = currentValue;
+    selectEl.value = currentValue;
   }
 
-  document.querySelectorAll('input[name="pet-sort"]').forEach(r => {
-    r.addEventListener("change", () => {
-      sortPetOptions(r.value);
-      // 並べ替え後にタイプ表示を再反映
-      setPetType(getPetType());
-    });
+  function applySortToBoth(mode) {
+    sortOptions(petSelectEl, mode);
+    sortOptions(monsterSelectEl, mode);
+    // 並べ替え後に表示再反映
+    updatePetTypeFromSelection();
+    onTargetChanged();
+  }
+
+  document.querySelectorAll('input[name="sort-mode"]').forEach(r => {
+    r.addEventListener("change", () => applySortToBoth(r.value));
   });
 
-  // --- 仮：ペットダメージ計算（後で式差し替え） ---
-  function calcPetDamagePhysical(petAtk, def, mdef) {
-    // 仮式：とりあえず動く形（後で正式式に差し替え）
-    const raw = petAtk - (def + mdef / 10);
+  // --- 仮：ダメージ式（あとで差し替え） ---
+  function calcPetPhysical(petAtk, def, mdef) {
+    // TODO: 正式式に置換
+    const raw = (petAtk - (def + mdef / 10));
     return Math.max(0, Math.floor(raw));
   }
-
-  function calcPetDamageMagic(petInt, def, mdef) {
-    // 仮式：とりあえず動く形（後で正式式に差し替え）
-    const raw = petInt - (mdef + def / 10);
+  function calcPetMagic(petInt, def, mdef) {
+    // TODO: 正式式に置換
+    const raw = (petInt - (mdef + def / 10));
     return Math.max(0, Math.floor(raw));
   }
 
   // --- イベント ---
   petSelectEl.addEventListener("change", () => {
-    setPetType(getPetType());
+    updatePetTypeFromSelection();
   });
 
   monsterSelectEl.addEventListener("change", () => {
     levelEl.value = 1;
-    onMonsterOrLevelChanged();
+    onTargetChanged();
   });
 
   levelEl.addEventListener("input", () => {
-    recalcMonsterStats();
+    recalcTargetStats();
   });
 
   calcBtn.addEventListener("click", () => {
-    const type = getPetType();
+    const petData = parseMonsterOption(petSelectEl);
+    if (!petData) {
+      resultEl.textContent = 0;
+      return;
+    }
+
+    const type = petData.attackType;
     const def = Number(defEl.value || 0);
     const mdef = Number(mdefEl.value || 0);
 
     let dmg = 0;
     if (type === "物理") {
-      dmg = calcPetDamagePhysical(Number(petAtkEl.value || 0), def, mdef);
+      dmg = calcPetPhysical(Number(petAtkEl.value || 0), def, mdef);
     } else if (type === "魔法") {
-      dmg = calcPetDamageMagic(Number(petIntEl.value || 0), def, mdef);
+      dmg = calcPetMagic(Number(petIntEl.value || 0), def, mdef);
     } else {
       dmg = 0;
     }
@@ -250,8 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- 初期化 ---
-  sortPetOptions("id");
-  setPetType(getPetType());
-  onMonsterOrLevelChanged();
+  applySortToBoth("id");
+  updatePetTypeFromSelection();
+  onTargetChanged();
 });
 </script>

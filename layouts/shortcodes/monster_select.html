@@ -2,12 +2,13 @@
   <option value="">-- 選択してください --</option>
 
   {{ $monsters := where site.RegularPages "Section" "monster" }}
-  {{ range sort $monsters ".Params.id" "asc" }}
-    {{ if .Params.id }}
-      <option value="{{ .Params.def }}|{{ .Params.mdef }}|{{ .Params.vit }}">
-        [{{ printf "%03d" .Params.id }}] {{ .Title }}
-      </option>
-    {{ end }}
+  {{ range $monsters }}
+    <option
+      value="{{ .Params.def }}|{{ .Params.mdef }}|{{ .Params.vit }}"
+      data-id="{{ .Params.id }}"
+      data-title="{{ .Title }}"
+    >
+      [{{ printf "%03d" .Params.id }}] {{ .Title }}
+    </option>
   {{ end }}
-
 </select>

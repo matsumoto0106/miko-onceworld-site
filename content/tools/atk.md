@@ -15,7 +15,11 @@ title: "与ダメージ計算"
       <label for="monster-select">モンスター選択：</label>
       {{< monster_select >}}
     </div>
-
+  <div class="form-row">
+  <span>並び順：</span>
+  <label><input type="radio" name="monster-sort" value="id" checked> 図鑑番号</label>
+  <label><input type="radio" name="monster-sort" value="kana"> 五十音</label>
+  </div>
   <div class="form-row">
       <label for="monster-level">モンスターレベル：</label>
       <input type="number" id="monster-level" value="1" min="1">
@@ -192,9 +196,48 @@ selectEl.addEventListener("change", () => {
     resultEl.textContent = dmg;
     updateMinLine();
   });
+  function sortMonsterOptions(mode) {
+  const currentValue = selectEl.value;
+
+  // 先頭の「--選択してください--」は残す
+  const placeholder = selectEl.options[0];
+  const opts = Array.from(selectEl.options).slice(1);
+
+  opts.sort((a, b) => {
+    if (mode === "id") {
+      const ai = Number(a.dataset.id || 0);
+      const bi = Number(b.dataset.id || 0);
+      return ai - bi;
+    } else {
+      // 五十音：タイトルで比較（日本語ロケール）
+      const at = (a.dataset.title || "").trim();
+      const bt = (b.dataset.title || "").trim();
+      return at.localeCompare(bt, "ja");
+    }
+  });
+
+  // 一旦中身を作り直す
+  selectEl.innerHTML = "";
+  selectEl.appendChild(placeholder);
+  opts.forEach(o => selectEl.appendChild(o));
+
+  // 選択状態を復元（同じvalueがあれば）
+  selectEl.value = currentValue;
+}
+
+// 並び順切替イベント
+document.querySelectorAll('input[name="monster-sort"]').forEach(r => {
+  r.addEventListener("change", () => {
+    sortMonsterOptions(r.value);
+
+    // 並べ替え後に選択が維持されていれば、表示も更新
+    onMonsterOrLevelChanged();
+  });
+});
 
 // 初期化
-onMonsterOrLevelChanged();
-updateMinLine();
+  sortMonsterOptions("id");
+  onMonsterOrLevelChanged();
+  updateMinLine();
 });
 </script>

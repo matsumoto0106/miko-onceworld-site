@@ -186,11 +186,17 @@ main {
     padding: 10px 14px;
   }
 }
-/* ナビリンクの状態を統一 */
+/* =================================================
+   Nav link color fix (keep blue even after click)
+================================================= */
+
+/* ナビリンク：すべての状態で同じ色に固定 */
 .site-nav a,
+.site-nav a:link,
 .site-nav a:visited,
 .site-nav a:hover,
-.site-nav a:active {
-  color: #2b6cb0;
+.site-nav a:active,
+.site-nav a:focus {
+  color: #2b6cb0 !important;
   text-decoration: none;
 }

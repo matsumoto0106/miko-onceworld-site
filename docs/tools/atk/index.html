@@ -31,9 +31,9 @@
 <section class="atk-tool">
   <h2>与ダメージ計算</h2>
   <div class="atk-form">
-<pre><code>&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;monster-select&quot;&gt;モンスター選択：&lt;/label&gt;
-  <select id="monster-select">
+  <div class="form-row">
+      <label for="monster-select">モンスター選択：</label>
+      <select id="monster-select">
         <option value="">-- 選択してください --</option>
       
         
@@ -854,41 +854,33 @@
       
       </select>
 
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;monster-level&quot;&gt;モンスターレベル：&lt;/label&gt;
-  &lt;input type=&quot;number&quot; id=&quot;monster-level&quot; value=&quot;1&quot; min=&quot;1&quot;&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;span&gt;攻撃タイプ：&lt;/span&gt;
-  &lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;attack-type&quot; value=&quot;phys&quot; checked&gt; 物理（ATK）&lt;/label&gt;
-  &lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;attack-type&quot; value=&quot;magic&quot;&gt; 魔法（INT）&lt;/label&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;atk&quot;&gt;ATK：&lt;/label&gt;
-  &lt;input type=&quot;number&quot; id=&quot;atk&quot; value=&quot;100&quot; min=&quot;0&quot;&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;int&quot;&gt;INT：&lt;/label&gt;
-  &lt;input type=&quot;number&quot; id=&quot;int&quot; value=&quot;100&quot; min=&quot;0&quot;&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;def&quot;&gt;DEF：&lt;/label&gt;
-  &lt;input type=&quot;number&quot; id=&quot;def&quot; value=&quot;0&quot; min=&quot;0&quot;&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;form-row&quot;&gt;
-  &lt;label for=&quot;mdef&quot;&gt;MDEF：&lt;/label&gt;
-  &lt;input type=&quot;number&quot; id=&quot;mdef&quot; value=&quot;0&quot; min=&quot;0&quot;&gt;
-&lt;/div&gt;
-
-&lt;button id=&quot;calc-btn&quot;&gt;計算する&lt;/button&gt;
-</code></pre>
+    </div>
+  <div class="form-row">
+      <label for="monster-level">モンスターレベル：</label>
+      <input type="number" id="monster-level" value="1" min="1">
+    </div>
+  <div class="form-row">
+      <span>攻撃タイプ：</span>
+      <label><input type="radio" name="attack-type" value="phys" checked> 物理（ATK）</label>
+      <label><input type="radio" name="attack-type" value="magic"> 魔法（INT）</label>
+    </div>
+  <div class="form-row">
+      <label for="atk">ATK：</label>
+      <input type="number" id="atk" value="100" min="0">
+    </div>
+  <div class="form-row">
+      <label for="int">INT：</label>
+      <input type="number" id="int" value="100" min="0">
+    </div>
+  <div class="form-row">
+      <label for="def">DEF：</label>
+      <input type="number" id="def" value="0" min="0">
+    </div>
+  <div class="form-row">
+      <label for="mdef">MDEF：</label>
+      <input type="number" id="mdef" value="0" min="0">
+    </div>
+<p><button id="calc-btn">計算する</button></p>
   </div>
   <div class="atk-result">
     <p>与ダメージ：<span id="result">---</span></p>

@@ -47,78 +47,70 @@
 
   
   
-  <section class="monster-stats">
-    
-  <p><section class="monster_name">名前:</section>
+<section class="monster-stats">
+
+  
+  <p>
+    <span class="monster_name">名前:</span>
     <span class="monster_name_physic">ハネスライム</span>
     (物理・近距離・水属性)
   </p>
+
   <div class="level-control">
     <label for="monster-level">Lv</label>
-    <input
-      type="number"
-      id="monster-level"
-      value="1"
-      min="1"
-    >
+    <input type="number" id="monster-level" value="1" min="1">
   </div>
 
-  <h2>ステータス</h2>
- <div class="table">
-  <div class="table_top">
-    <div class="table_status" id="status-table">
-      <dt>VIT:</dt>
-      <dd data-stat="vit" data-base="35">
-        35
-      </dd>
+  
+  <section class="monster-panel monster-panel--status">
+    <h2>ステータス</h2>
 
-      <dt>SPD:</dt>
-      <dd data-stat="spd" data-base="9">
-        9
-      </dd>
+    <div class="table">
+      <div class="table_top">
 
-      <dt>ATK:</dt>
-      <dd data-stat="atk" data-base="15">
-        15
-      </dd>
-      <dt>INT:</dt>
-      <dd data-stat="int" data-base="2">
-        2
-      </dd>
-      <dt>DEF:</dt>
-      <dd data-stat="def" data-base="17">
-        17
-      </dd>
+        <dl class="table_status" id="status-table">
+          <dt>VIT:</dt>
+          <dd data-stat="vit" data-base="35">35</dd>
 
-      <dt>M-DEF:</dt>
-      <dd data-stat="mdef" data-base="23">
-        23
-      </dd>
+          <dt>SPD:</dt>
+          <dd data-stat="spd" data-base="9">9</dd>
 
-      <dt>LUK:</dt>
-      <dd data-stat="luk" data-base="18">
-        18
-      </dd>
+          <dt>ATK:</dt>
+          <dd data-stat="atk" data-base="15">15</dd>
 
-      <dt>MOV:</dt>
-      <dd data-stat="mov" data-base="9">
-        9
+          <dt>INT:</dt>
+          <dd data-stat="int" data-base="2">2</dd>
+
+          <dt>DEF:</dt>
+          <dd data-stat="def" data-base="17">17</dd>
+
+          <dt>M-DEF:</dt>
+          <dd data-stat="mdef" data-base="23">23</dd>
+
+          <dt>LUK:</dt>
+          <dd data-stat="luk" data-base="18">18</dd>
+
+          <dt>MOV:</dt>
+          <dd data-stat="mov" data-base="9">9</dd>
+        </dl>
+
+        <dl class="table_infomasion" id="info-table">
+          <dt>EXP:</dt>
+          <dd data-stat="exp" data-base="2380">2380</dd>
+
+          <dt>GOLD:</dt>
+          <dd>300</dd>
+
+          <dt>捕獲確率:</dt>
+          <dd>3%</dd>
+        </dl>
+
+      </div>
     </div>
-    <div class="table_infomasion" id="info-table">
-      <dt>EXP:</dt>
-      <dd data-stat="exp" data-base="2380">
-        2380
-      </dd>
+  </section>
+  
 
-      <dt>GOLD:</dt>
-      <dd>300</dd>
-
-      <dt>捕獲確率:</dt>
-      <dd>3%</dd>
-    </div>
-  </div>
- </div>
-
+</section>
 
   
 

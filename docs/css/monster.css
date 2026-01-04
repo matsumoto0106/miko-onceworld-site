@@ -50,9 +50,9 @@
 
 /* 番号（名前の後ろに小さく） */
 .monster-id {
-  font-size: 0.8rem;
-  font-weight: 700;       /* 色が反映されたとき見えるように */
-  opacity: 0.85;
+  font-size: 0.5em;      /* ★ 親（名前）の半分サイズ */
+  font-weight: 600;
+  opacity: 0.8;
   white-space: nowrap;
 }
 

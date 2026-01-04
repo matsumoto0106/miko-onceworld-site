@@ -50,7 +50,7 @@
 
 /* 番号（名前の後ろに小さく） */
 .monster-id {
-  font-size: 0.5em;      /* ★ 親（名前）の半分サイズ */
+  font-size: 0.65em;      /* ★ 親（名前）に対してのサイズ */
   font-weight: 600;
   opacity: 0.8;
   white-space: nowrap;

@@ -181,9 +181,7 @@
 
 /* 下罫線を確実に見せる（dt/dd を行として扱う） */
 .table_status dt,
-.table_status dd,
-.table_infomasion dt,
-.table_infomasion dd {
+.table_infomasion dt {
   display: block;              /* ★これが効きます */
   width: 200%;
   padding: 6px 0;

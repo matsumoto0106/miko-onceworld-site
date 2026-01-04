@@ -38,6 +38,7 @@
 <article class="monster-detail">
   
   <h1 class="monster-title">イグニシア</h1>
+
   
   
     <div class="monster-image">
@@ -46,101 +47,124 @@
   
 
   
-  
-<section class="monster-stats">
+  <section class="monster-stats">
 
-  
-  <p>
-    <span class="monster_name">名前:</span>
-    <span class="monster_name_physic">イグニシア</span>
-    (魔法・遠距離・火属性)
-  </p>
+    
+    <p class="monster-basic">
+      <span class="monster_name">名前:</span>
+      <span class="monster_name_physic">イグニシア</span>
+      (魔法・遠距離・火属性)
+    </p>
 
-  <div class="level-control">
-    <label for="monster-level">Lv</label>
-    <input type="number" id="monster-level" value="1" min="1">
-  </div>
-
-  
-  <section class="monster-panel monster-panel--status">
-    <h2>ステータス</h2>
-
-    <div class="table">
-      <div class="table_top">
-
-        <dl class="table_status" id="status-table">
-          <dt>VIT:</dt>
-          <dd data-stat="vit" data-base="48">48</dd>
-
-          <dt>SPD:</dt>
-          <dd data-stat="spd" data-base="46">46</dd>
-
-          <dt>ATK:</dt>
-          <dd data-stat="atk" data-base="9">9</dd>
-
-          <dt>INT:</dt>
-          <dd data-stat="int" data-base="91">91</dd>
-
-          <dt>DEF:</dt>
-          <dd data-stat="def" data-base="22">22</dd>
-
-          <dt>M-DEF:</dt>
-          <dd data-stat="mdef" data-base="46">46</dd>
-
-          <dt>LUK:</dt>
-          <dd data-stat="luk" data-base="55">55</dd>
-
-          <dt>MOV:</dt>
-          <dd data-stat="mov" data-base="17">17</dd>
-        </dl>
-
-        <dl class="table_infomasion" id="info-table">
-          <dt>EXP:</dt>
-          <dd data-stat="exp" data-base="634">634</dd>
-
-          <dt>GOLD:</dt>
-          <dd>900</dd>
-
-          <dt>捕獲確率:</dt>
-          <dd>1%</dd>
-        </dl>
-
-      </div>
+    <div class="level-control">
+      <label for="monster-level">Lv</label>
+      <input type="number" id="monster-level" value="1" min="1">
     </div>
+
+    
+    <section class="monster-panel monster-panel--status">
+      <h2>ステータス</h2>
+
+      <div class="table">
+        <div class="table_top">
+
+          
+          <dl class="table_status" id="status-table">
+
+            <div class="stat-row">
+              <dt>VIT</dt>
+              <dd data-stat="vit" data-base="48">48</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>SPD</dt>
+              <dd data-stat="spd" data-base="46">46</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>ATK</dt>
+              <dd data-stat="atk" data-base="9">9</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>INT</dt>
+              <dd data-stat="int" data-base="91">91</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>DEF</dt>
+              <dd data-stat="def" data-base="22">22</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>M-DEF</dt>
+              <dd data-stat="mdef" data-base="46">46</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>LUK</dt>
+              <dd data-stat="luk" data-base="55">55</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>MOV</dt>
+              <dd data-stat="mov" data-base="17">17</dd>
+            </div>
+
+          </dl>
+
+          
+          <dl class="table_infomasion" id="info-table">
+
+            <div class="stat-row">
+              <dt>EXP</dt>
+              <dd data-stat="exp" data-base="634">634</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>GOLD</dt>
+              <dd>900</dd>
+            </div>
+
+            <div class="stat-row">
+              <dt>捕獲確率</dt>
+              <dd>1%</dd>
+            </div>
+
+          </dl>
+
+        </div>
+      </div>
+    </section>
+  </section>
+
+  
+  
+  <section class="monster-drop">
+    <h2>ドロップアイテム</h2>
+    <ul>
+      
+        <li>赤のかけら</li>
+      
+    </ul>
   </section>
   
 
-</section>
-
+  
+  
+  <section class="monster-locations">
+    <h2>出現場所</h2>
+    <ul>
+      
+        <li>たまご</li>
+      
+    </ul>
+  </section>
   
 
-<section class="monster-drop">
-  <h2>ドロップアイテム</h2>
-  <ul>
-    
-      <li>赤のかけら</li>
-    
-  </ul>
-</section>
-
-
-
-<section class="monster-locations">
-  <h2>出現場所</h2>
-  <ul>
-    
-      <li>たまご</li>
-    
-  </ul>
-</section>
-
-
-<script src="https://matsumoto0106.github.io/miko-onceworld-site/js/status-calc.js"></script>
-
-  
+  <script src="https://matsumoto0106.github.io/miko-onceworld-site/js/status-calc.js"></script>
 
   <p><a href="https://matsumoto0106.github.io/miko-onceworld-site/monster/">一覧に戻る</a></p>
-
 </article>
 
 </main>

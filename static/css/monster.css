@@ -175,3 +175,15 @@
     grid-template-columns: 110px 1fr;
   }
 }
+/* =================================================
+   Status row separators (下罫線)
+================================================= */
+
+/* 1行（dt + dd）をまとめて区切る */
+.table_status dt,
+.table_status dd,
+.table_infomasion dt,
+.table_infomasion dd {
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+}

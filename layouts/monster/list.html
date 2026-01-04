@@ -6,8 +6,7 @@
   {{ range sort .Pages ".Params.id" "asc" }}
     {{ $p := . }}
 
-    <a
-      href="{{ $p.RelPermalink }}"
+    <a href="{{ $p.RelPermalink }}"
       class="monster-card {{ if eq $p.Params.attack_type "魔法" }}attack-magic{{ else }}attack-physic{{ end }}"
     >
       {{ with $p.Params.image }}
@@ -18,9 +17,9 @@
 
       <div class="monster-card-body">
         <h2 class="monster-name">
-          {{ $p.Title }}
-          <span class="monster-id">No.{{ $p.Params.id }}</span>
-        </h2>
+  {{ $p.Title }}
+  <span class="monster-id">({{ $p.Params.id }})</span>
+</h2>
       </div>
     </a>
   {{ end }}

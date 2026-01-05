@@ -66,4 +66,7 @@ title: "被ダメージ計算"
 
 </div>
 
+{{< rawhtml >}}
 <script src="{{ "js/def-calc.js" | relURL }}"></script>
+{{< /rawhtml >}}
+

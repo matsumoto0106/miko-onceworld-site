@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> | OnceWorld(ワンスワ)miko</title>
+  <title>命中回避計算ツール | OnceWorld(ワンスワ)miko</title>
 
   <link rel="stylesheet" href="https://matsumoto0106.github.io/miko-onceworld-site/css/style.css">
   <link rel="stylesheet" href="https://matsumoto0106.github.io/miko-onceworld-site/css/monster.css">
@@ -36,13 +36,10 @@
 <main>
   
 
-<h1></h1>
+<h1>命中回避計算ツール</h1>
 
 <div class="tool-container">
-  <h2 id="-contenttoolslukmd全文置き換え">// content/tools/luk.md（全文置き換え）</h2>
-<h2 id="title-命中回避計算ツール">title: &ldquo;命中回避計算ツール&rdquo;</h2>
-<h1>命中回避計算ツール</h1>
-<div class="tool-box">
+  <div class="tool-box">
   <div class="tool-row">
     <label for="enemy-select">敵モンスター選択：</label>
     
@@ -880,15 +877,13 @@
     <button id="calc-btn" type="button">計算する</button>
   </div>
   <hr>
-  <section class="tool-result">
+<section class="tool-result">
     <h2>計算結果</h2>
-<pre><code>&lt;p&gt;敵LUK：&lt;strong id=&quot;enemy-luk&quot;&gt;---&lt;/strong&gt;&lt;/p&gt;
-
-&lt;p&gt;命中に必要な攻撃側LUK：&lt;strong id=&quot;need-hit&quot;&gt;---&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;回避が発生する防御側LUK：&lt;strong id=&quot;need-evade&quot;&gt;---&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;ほぼ完全回避の防御側LUK：&lt;strong id=&quot;need-perfect&quot;&gt;---&lt;/strong&gt;&lt;/p&gt;
-</code></pre>
-  </section>
+    <p>敵LUK：<strong id="enemy-luk">---</strong></p>
+    <p>命中に必要な攻撃側LUK：<strong id="need-hit">---</strong></p>
+    <p>回避が発生する防御側LUK：<strong id="need-evade">---</strong></p>
+    <p>ほぼ完全回避の防御側LUK：<strong id="need-perfect">---</strong></p>
+</section>
 </div>
 
 <script src="https://matsumoto0106.github.io/miko-onceworld-site/js/luk-calc.js"></script>

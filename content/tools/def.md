@@ -1,4 +1,3 @@
-// content/tools/def.md（全文置き換え）
 ---
 title: "被ダメージ計算"
 description: "被ダメージを計算するツールです。"

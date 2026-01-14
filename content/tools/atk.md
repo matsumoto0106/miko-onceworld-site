@@ -9,11 +9,11 @@ title: "与ダメージ計算"
 
   <div class="atk-form">
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="enemy-select">モンスター選択：</label>
       {{< monster_select id="enemy-select" role="enemy" >}}
 
-  <label>並び順：</label>
+      <label>並び順：</label>
       <select data-monster-order="enemy">
         <option value="id-asc">図鑑番号（昇順）</option>
         <option value="name-asc">名前（昇順）</option>
@@ -21,38 +21,44 @@ title: "与ダメージ計算"
       </select>
     </div>
 
-  <div class="form-row">
+    <!-- ★ よくあるLv（未選択/未設定なら非表示） -->
+    <div class="form-row" id="common-lv-row" style="display:none;">
+      <label>よくあるLv：</label>
+      <div id="common-lv-buttons"></div>
+    </div>
+
+    <div class="form-row">
       <label for="monster-level">モンスターレベル：</label>
       <input type="number" id="monster-level" value="1" min="1">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <span>攻撃タイプ：</span>
       <label><input type="radio" name="attack-type" value="phys" checked> 物理（ATK）</label>
       <label><input type="radio" name="attack-type" value="magic"> 魔法（INT）</label>
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="atk">ATK：</label>
       <input type="number" id="atk" value="100" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="int">INT：</label>
       <input type="number" id="int" value="100" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="def">DEF：</label>
       <input type="number" id="def" value="0" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="mdef">MDEF：</label>
       <input type="number" id="mdef" value="0" min="0">
     </div>
 
-  <button id="calc-btn" type="button">計算する</button>
+    <button id="calc-btn" type="button">計算する</button>
   </div>
 
   <div class="atk-result">
@@ -75,6 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const calcBtn   = document.getElementById("calc-btn");
   const vitDisplayEl = document.getElementById("vit-display");
 
+  // ★ よくあるLv UI
+  const commonRow = document.getElementById("common-lv-row");
+  const commonWrap = document.getElementById("common-lv-buttons");
+
   if (!selectEl || !levelEl || !atkEl || !intEl || !defEl || !mdefEl || !resultEl || !minlineEl || !calcBtn) return;
 
   let baseDef = 0;
@@ -94,10 +104,52 @@ document.addEventListener("DOMContentLoaded", () => {
     return checked ? checked.value : "phys";
   }
 
+  // ★ よくあるLvの描画
+  function renderCommonLevels() {
+    if (!commonRow || !commonWrap) return;
+
+    const opt = selectEl.options[selectEl.selectedIndex];
+    const raw = (opt && opt.dataset && opt.dataset.levels) ? String(opt.dataset.levels) : "";
+    const levels = raw
+      .split(",")
+      .map(s => Number(String(s).trim()))
+      .filter(n => Number.isFinite(n) && n >= 1);
+
+    // 未選択 or 設定なし → 非表示
+    if (!opt || !opt.value || levels.length === 0) {
+      commonWrap.innerHTML = "";
+      commonRow.style.display = "none";
+      return;
+    }
+
+    commonWrap.innerHTML = "";
+    commonRow.style.display = "";
+
+    levels.forEach(lv => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = String(lv);
+      b.style.marginRight = "6px";
+      b.style.padding = "4px 10px";
+      b.style.borderRadius = "999px";
+      b.style.border = "1px solid #ddd";
+      b.style.background = "#fff";
+      b.style.cursor = "pointer";
+
+      b.addEventListener("click", () => {
+        levelEl.value = lv;
+        // 既存の入力イベント経由で再計算させる
+        levelEl.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+
+      commonWrap.appendChild(b);
+    });
+  }
+
   // 共通monster_selectの data-* を読む
   function loadMonsterBases() {
     const opt = selectEl.options[selectEl.selectedIndex];
-    if (!opt || !opt.value) { // placeholder/未選択
+    if (!opt || !opt.value) {
       baseDef = 0; baseMdef = 0; baseVit = 0;
       return;
     }
@@ -163,6 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   selectEl.addEventListener("change", () => {
     levelEl.value = 1;
+    renderCommonLevels();      // ★追加
     onMonsterOrLevelChanged();
   });
 
@@ -190,6 +243,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMinLine();
   });
 
+  // 初期化
+  renderCommonLevels();        // ★追加
   onMonsterOrLevelChanged();
 });
 </script>

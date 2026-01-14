@@ -2568,18 +2568,16 @@
       
     </select>
 
+<p><label>並び順：</label>
+<select data-monster-order="enemy">
+<option value="id-asc">図鑑番号（昇順）</option>
+<option value="name-asc">名前（昇順）</option>
+<option value="name-desc">名前（降順）</option>
+</select></p>
   </div>
   <div class="tool-row">
     <label for="enemy-level">敵レベル：</label>
     <input type="number" id="enemy-level" value="1" min="1">
-  </div>
-  <div class="tool-row">
-    <label for="monster-order">並び順：</label>
-    <select id="monster-order">
-      <option value="id-asc" selected>図鑑番号（昇順）</option>
-      <option value="name-asc">名前（昇順）</option>
-      <option value="name-desc">名前（降順）</option>
-    </select>
   </div>
   <hr>
   <div class="tool-row">
@@ -2595,21 +2593,21 @@
   </div>
   <hr>
   <section class="tool-result">
-<h2>計算結果</h2>
-<p>
-  敵の攻撃タイプ：
-    <strong id="enemy-attack-type">---</strong>
-</p>
-<p>
-  最終被ダメージ：
-    <strong id="result-dmg">---</strong>
-    <span class="note">（最低保証：1）</span>
-  </p>
-<p>
-  被ダメを一桁(1〜9)に抑えるには：
-    <strong id="need-label">必要DEF</strong>
-    <strong id="result-need">---</strong>
-  </p>
+    <h2>計算結果</h2>
+  <p>
+      敵の攻撃タイプ：
+      <strong id="enemy-attack-type">---</strong>
+    </p>
+  <p>
+      最終被ダメージ：
+      <strong id="result-dmg">---</strong>
+      <span class="note">（最低保証：1）</span>
+    </p>
+  <p>
+      被ダメを一桁(1〜9)に抑えるには：
+      <strong id="need-label">必要DEF</strong>
+      <strong id="result-need">---</strong>
+    </p>
   </section>
 </div>
 

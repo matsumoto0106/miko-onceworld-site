@@ -14,6 +14,13 @@ title: "ペット与ダメージ計算"
   <div class="form-row">
       <label for="pet-select">ペット選択：</label>
       {{< monster_select id="pet-select" role="pet" >}}
+
+  <label for="monster-order">並び順：</label>
+      <select id="monster-order" data-monster-order="both">
+        <option value="id-asc" selected>図鑑番号（昇順）</option>
+        <option value="name-asc">名前（昇順）</option>
+        <option value="name-desc">名前（降順）</option>
+      </select>
     </div>
 
   <div class="form-row">
@@ -36,14 +43,9 @@ title: "ペット与ダメージ計算"
   <div class="form-row">
       <label for="enemy-select">攻撃対象モンスター：</label>
       {{< monster_select id="enemy-select" role="enemy" >}}
-
-  <label for="monster-order">並び順：</label>
-     <select id="monster-order" data-monster-order="enemy">
-        <option value="id-asc" selected>図鑑番号（昇順）</option>
-        <option value="name-asc">名前（昇順）</option>
-        <option value="name-desc">名前（降順）</option>
-      </select>
     </div>
+
+  <!-- ★ よくあるLv（敵モンスター用） -->
   <div class="form-row" id="common-lv-row" style="display:none;">
       <label>よくあるLv：</label>
       <div id="common-lv-buttons"></div>
@@ -112,10 +114,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return Math.max(1, Number(levelEl.value || 1));
   }
 
-  // ★ ペット攻撃タイプ（monster_select の data-attack-type を使う）
+  // --- ペット攻撃タイプ（monster_select の data-attack-type） ---
   function updatePetType() {
     const opt = petSelectEl.options[petSelectEl.selectedIndex];
-    const t = opt?.dataset?.attackType || "";
+    const t = (opt?.dataset?.attackType || "").trim();
     petTypeEl.textContent = t || "---";
 
     if (t === "物理") {
@@ -140,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ★ 敵「よくあるLv」描画（data-levels）
+  // --- 敵「よくあるLv」描画（data-levels） ---
   function renderCommonLevels() {
     if (!commonRow || !commonWrap) return;
 

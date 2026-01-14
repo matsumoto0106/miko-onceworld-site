@@ -5,7 +5,7 @@ title: "命中回避計算ツール"
 
   <div class="tool-row">
     <label for="enemy-select">敵モンスター選択：</label>
-    {{< monster_select_enemy_luk >}}
+    {{< monster_select id="enemy-select" role="enemy" >}}
   </div>
 
   <div class="tool-row">

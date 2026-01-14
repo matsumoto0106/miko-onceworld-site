@@ -233,3 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
   onMonsterOrLevelChanged();
 });
 </script>
+
+{{< rawhtml >}}
+<script src="/js/monster-order.js"></script>
+{{< /rawhtml >}}

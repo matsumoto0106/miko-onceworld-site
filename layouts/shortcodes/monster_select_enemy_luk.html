@@ -9,7 +9,6 @@
         data-id="{{ $p.Params.id }}"
         data-name="{{ $p.Title }}"
         data-luk="{{ $p.Params.luk }}"
-        data-level-shortcuts='{{ with $p.Params.level_shortcuts }}{{ . | jsonify }}{{ else }}[]{{ end }}'
       >
         {{ $p.Title }}
       </option>

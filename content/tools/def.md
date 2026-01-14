@@ -68,6 +68,7 @@ title: "被ダメージ計算"
 
 {{< rawhtml >}}
 <script src="/js/def-calc.js"></script>
+<script src="/js/monster-order.js"></script>
 {{< /rawhtml >}}
 
 <hr>

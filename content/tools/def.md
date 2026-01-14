@@ -8,7 +8,7 @@ title: "被ダメージ計算"
 
   <div class="tool-row">
     <label for="enemy-select">敵モンスター選択：</label>
-    {{< monster_select_enemy >}}
+    {{< monster_select id="enemy-select" role="enemy" >}}
   </div>
 
   <div class="tool-row">

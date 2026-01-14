@@ -6,6 +6,10 @@
 
   {{ $monsters := where site.RegularPages "Section" "monster" }}
   {{ range sort $monsters ".Params.id" "asc" }}
+
+    {{/* 「よくあるLv」候補：複数のキー名を許容 */}}
+    {{ $levels := or .Params.levels .Params.common_levels .Params.level_shortcuts .Params.levelButtons .Params.shortcuts }}
+
     <option
       value="{{ .RelPermalink }}"
       data-id="{{ .Params.id }}"
@@ -16,9 +20,8 @@
       data-mdef="{{ .Params.mdef }}"
       data-vit="{{ .Params.vit }}"
       data-luk="{{ .Params.luk }}"
-      {{ with .Params.levels }}
-      data-levels="{{ delimit . "," }}"
-      {{ end }}
+      data-attack-type="{{ .Params.attack_type }}"
+      {{ with $levels }}data-levels="{{ delimit . "," }}"{{ end }}
     >
       {{ if .Params.id }}[{{ printf "%03d" .Params.id }}] {{ end }}{{ .Title }}
     </option>

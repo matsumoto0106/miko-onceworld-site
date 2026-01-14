@@ -9,20 +9,18 @@ title: "被ダメージ計算"
   <div class="tool-row">
     <label for="enemy-select">敵モンスター選択：</label>
     {{< monster_select id="enemy-select" role="enemy" >}}
+
+  <label>並び順：</label>
+    <select data-monster-order="enemy">
+      <option value="id-asc">図鑑番号（昇順）</option>
+      <option value="name-asc">名前（昇順）</option>
+      <option value="name-desc">名前（降順）</option>
+    </select>
   </div>
 
   <div class="tool-row">
     <label for="enemy-level">敵レベル：</label>
     <input type="number" id="enemy-level" value="1" min="1">
-  </div>
-
-  <div class="tool-row">
-    <label for="monster-order">並び順：</label>
-    <select id="monster-order">
-      <option value="id-asc" selected>図鑑番号（昇順）</option>
-      <option value="name-asc">名前（昇順）</option>
-      <option value="name-desc">名前（降順）</option>
-    </select>
   </div>
 
   <hr>
@@ -44,24 +42,24 @@ title: "被ダメージ計算"
   <hr>
 
   <section class="tool-result">
-<h2>計算結果</h2>
+    <h2>計算結果</h2>
 
-<p>
-  敵の攻撃タイプ：
-    <strong id="enemy-attack-type">---</strong>
-</p>
+  <p>
+      敵の攻撃タイプ：
+      <strong id="enemy-attack-type">---</strong>
+    </p>
 
-<p>
-  最終被ダメージ：
-    <strong id="result-dmg">---</strong>
-    <span class="note">（最低保証：1）</span>
-  </p>
+  <p>
+      最終被ダメージ：
+      <strong id="result-dmg">---</strong>
+      <span class="note">（最低保証：1）</span>
+    </p>
 
-<p>
-  被ダメを一桁(1〜9)に抑えるには：
-    <strong id="need-label">必要DEF</strong>
-    <strong id="result-need">---</strong>
-  </p>
+  <p>
+      被ダメを一桁(1〜9)に抑えるには：
+      <strong id="need-label">必要DEF</strong>
+      <strong id="result-need">---</strong>
+    </p>
   </section>
 
 </div>
@@ -78,4 +76,3 @@ title: "被ダメージ計算"
   「必要DEF / MDEF」は、被ダメージを一桁（1〜9）に抑えるために必要な単体でのラインの目安です。<br>
   実際には防御力=(DEF+MDEF*0.1) 魔法防御=(MDEF+DEF*0.1)の値がラインを越えていれば大丈夫です。
 </p>
-

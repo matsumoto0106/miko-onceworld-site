@@ -9,11 +9,11 @@ title: "与ダメージ計算"
 
   <div class="atk-form">
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="enemy-select">モンスター選択：</label>
       {{< monster_select id="enemy-select" role="enemy" >}}
 
-  <label>並び順：</label>
+      <label>並び順：</label>
       <select data-monster-order="enemy">
         <option value="id-asc">図鑑番号（昇順）</option>
         <option value="name-asc">名前（昇順）</option>
@@ -21,38 +21,38 @@ title: "与ダメージ計算"
       </select>
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="monster-level">モンスターレベル：</label>
       <input type="number" id="monster-level" value="1" min="1">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <span>攻撃タイプ：</span>
       <label><input type="radio" name="attack-type" value="phys" checked> 物理（ATK）</label>
       <label><input type="radio" name="attack-type" value="magic"> 魔法（INT）</label>
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="atk">ATK：</label>
       <input type="number" id="atk" value="100" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="int">INT：</label>
       <input type="number" id="int" value="100" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="def">DEF：</label>
       <input type="number" id="def" value="0" min="0">
     </div>
 
-  <div class="form-row">
+    <div class="form-row">
       <label for="mdef">MDEF：</label>
       <input type="number" id="mdef" value="0" min="0">
     </div>
 
-  <button id="calc-btn" type="button">計算する</button>
+    <button id="calc-btn" type="button">計算する</button>
   </div>
 
   <div class="atk-result">
@@ -62,7 +62,6 @@ title: "与ダメージ計算"
   </div>
 </section>
 
-{{< rawhtml >}}
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const selectEl  = document.getElementById("enemy-select");
@@ -74,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resultEl  = document.getElementById("result");
   const minlineEl = document.getElementById("minline");
   const calcBtn   = document.getElementById("calc-btn");
-  const vitDisplayEl = document.getElementById("vit-display"); // 任意（無くても動く）
+  const vitDisplayEl = document.getElementById("vit-display");
 
   if (!selectEl || !levelEl || !atkEl || !intEl || !defEl || !mdefEl || !resultEl || !minlineEl || !calcBtn) return;
 
@@ -98,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 共通monster_selectの data-* を読む
   function loadMonsterBases() {
     const opt = selectEl.options[selectEl.selectedIndex];
-    if (!opt || !opt.value) {
+    if (!opt || !opt.value) { // placeholder/未選択
       baseDef = 0; baseMdef = 0; baseVit = 0;
       return;
     }
@@ -117,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     defEl.value  = def;
     mdefEl.value = mdef;
 
-    // VIT表示がある場合だけ更新（HP換算：vit*18+100）
     if (vitDisplayEl) {
       const vit = scaleByLevel(baseVit, lv);
       vitDisplayEl.textContent = vit * 18 + 100;
@@ -163,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMinLine();
   }
 
-  // --- イベント登録 ---
   selectEl.addEventListener("change", () => {
     levelEl.value = 1;
     onMonsterOrLevelChanged();
@@ -193,9 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
     updateMinLine();
   });
 
-  // 初期化
   onMonsterOrLevelChanged();
 });
 </script>
+
+{{< rawhtml >}}
 <script src="/js/monster-order.js"></script>
 {{< /rawhtml >}}

@@ -1,9 +1,9 @@
----
-title: "テストヘルム"
-slot: "head"
-series: "テストシリーズ"
-match_mul: 1.10
-base_add:
-  def: 10
-  mdef: 5
----
++++
+title = "テストヘルム"
++++
+
+slot = "head"
+series = "test-series"
+
+[base_add]
+vit = 20

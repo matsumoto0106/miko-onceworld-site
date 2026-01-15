@@ -1,6 +1,5 @@
 +++
 title = "テストガントレット"
-+++
 
 slot = "arms"
 series = "test-series"
@@ -8,3 +7,5 @@ series = "test-series"
 [base_add]
 atk = 15
 def = 10
+
++++

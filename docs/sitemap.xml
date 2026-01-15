@@ -6,6 +6,8 @@
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/categories/</loc>
   </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/</loc>
+  </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/tags/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/45/</loc>
@@ -58,8 +60,6 @@
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/68/</loc>
   </url><url>
-    <loc>https://matsumoto0106.github.io/miko-onceworld-site/tools/status/</loc>
-  </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/32/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/22/</loc>
@@ -71,6 +71,20 @@
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/165/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/48/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_body/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_arms/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_shield/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_weapons/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/pet-skill/test_pet/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_head/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/db/equip/test_legs/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/242/</loc>
   </url><url>
@@ -119,6 +133,8 @@
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/49/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/tools/atk/</loc>
+  </url><url>
+    <loc>https://matsumoto0106.github.io/miko-onceworld-site/tools/status/</loc>
   </url><url>
     <loc>https://matsumoto0106.github.io/miko-onceworld-site/monster/204/</loc>
   </url><url>

@@ -1,9 +1,9 @@
 <script>
 window.EQUIP_DB =
-{{- $sec := site.GetPage "db/equip" -}}
-{{- if $sec -}}
-  {{- $arr := slice -}}
-  {{- range $sec.RegularPagesRecursive -}}
+{{- $pages := where site.RegularPages "Section" "db" -}}
+{{- $arr := slice -}}
+{{- range $pages -}}
+  {{- if eq .File.Dir "content/db/equip/" -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "slot" (.Params.slot | default "")
@@ -11,9 +11,7 @@ window.EQUIP_DB =
       "base_add" (.Params.base_add | default dict)
     ) -}}
   {{- end -}}
-  {{- $arr | jsonify -}}
-{{- else -}}
-  []
 {{- end -}}
+{{- $arr | jsonify -}}
 ;
 </script>

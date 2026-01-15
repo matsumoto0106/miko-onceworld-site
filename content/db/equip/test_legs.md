@@ -1,9 +1,9 @@
----
-title: "テストレッグ"
-slot: "body"
-series: "テストシリーズ"
-match_mul: 1.10
-base_add:
-  vit: 20
-  def: 15
----
++++
+title = "テストグリーブ"
++++
+
+slot = "legs"
+series = "test-series"
+
+[base_add]
+spd = 10

@@ -2,15 +2,32 @@
 {{- $limit  := (.Get "limit" | default "200") | int -}}
 
 <details style="margin:12px 0;">
-  <summary>デバッグ：AllPages File.Path（filter="{{ $filter }}", limit={{ $limit }}）</summary>
+  <summary>デバッグ：Pages（filter="{{ $filter }}", limit={{ $limit }}）</summary>
 
-  <pre style="white-space:pre-wrap; font-size:12px; line-height:1.4;">
+  <p style="margin:6px 0 0; font-size:12px;">
+    総ページ数（site.AllPages）：{{ len site.AllPages }}
+  </p>
+
+  <pre style="white-space:pre-wrap; font-size:12px; line-height:1.4; margin-top:6px;">
 {{- $n := 0 -}}
 {{- range site.AllPages -}}
-  {{- if and (lt $n $limit) .File -}}
-    {{- $p := .File.Path -}}
-    {{- if or (eq $filter "") (in $p $filter) -}}
-{{ $p }}
+  {{- if lt $n $limit -}}
+    {{- $rp := .RelPermalink -}}
+    {{- $p  := .Path -}}
+    {{- $fp := "" -}}
+    {{- if .File -}}{{- $fp = .File.Path -}}{{- end -}}
+
+    {{- $hit := false -}}
+    {{- if eq $filter "" -}}
+      {{- $hit = true -}}
+    {{- else -}}
+      {{- if or (in $rp $filter) (in $p $filter) (and $fp (in $fp $filter)) -}}
+        {{- $hit = true -}}
+      {{- end -}}
+    {{- end -}}
+
+    {{- if $hit -}}
+kind={{ .Kind }} | rel={{ $rp }} | path={{ $p }}{{ if $fp }} | file={{ $fp }}{{ end }}
       {{- $n = add $n 1 -}}
     {{- end -}}
   {{- end -}}

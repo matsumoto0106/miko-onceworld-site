@@ -2,7 +2,7 @@
 window.ACC_DB =
 {{- $arr := slice -}}
 {{- range site.AllPages -}}
-  {{- if and .File (hasPrefix .File.Path "db/acc/") -}}
+  {{- if and .File (in .File.Path "db/acc/") -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "flat_add" (.Params.flat_add | default dict)

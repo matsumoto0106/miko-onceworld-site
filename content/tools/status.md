@@ -2,16 +2,20 @@
 title: "主人公ステータス・シミュレーター（デバッグ）"
 ---
 
-{{< rawhtml >}}
-<p class="note" style="margin:8px 0;">
-  ※このページは「Hugoが認識しているページ一覧（File.Path）」を表示します。
+<p class="note">
+  ※このページは「Hugoが認識しているページ一覧」を表示します（.Fileが取れない場合でも表示されます）。
 </p>
-{{< /rawhtml >}}
 
-<!-- まず “db/ に限らず” 全体のFile.Pathを見せる -->
-{{< debug_pages limit="200" >}}
+{{< debug_pages limit="60" >}}
 
 <hr>
 
-<!-- 次に db/ だけ抽出（比較用） -->
-{{< debug_pages filter="db/" limit="200" >}}
+{{< debug_pages filter="monster" limit="120" >}}
+
+<hr>
+
+{{< debug_pages filter="tools" limit="120" >}}
+
+<hr>
+
+{{< debug_pages filter="db" limit="200" >}}

@@ -1,15 +1,43 @@
 document.addEventListener("DOMContentLoaded", () => {
   const STATS = ["vit","spd","atk","int","def","mdef","luk","mov"];
   const $ = (id) => document.getElementById(id);
+
   const n = (v, fb=0) => {
     const x = Number(v);
     return Number.isFinite(x) ? x : fb;
   };
 
-  // DB（shortcode で window に注入される想定）
-  const EQUIP_DB = Array.isArray(window.EQUIP_DB) ? window.EQUIP_DB : [];
-  const ACC_DB   = Array.isArray(window.ACC_DB)   ? window.ACC_DB   : [];
-  const PET_DB   = Array.isArray(window.PET_DB)   ? window.PET_DB   : [];
+  // =========================
+  // DB normalize (今回の修正の核)
+  // - 配列: そのまま
+  // - 文字列: JSON.parse して配列/オブジェクトにする
+  // - それ以外/失敗: fallback
+  // =========================
+  function parseMaybeJSON(v, fb) {
+    if (Array.isArray(v) || (v && typeof v === "object")) return v;
+    if (typeof v !== "string") return fb;
+
+    const s = v.trim();
+    if (!s) return fb;
+
+    // よくあるケース: "[]", "[{...}]" など
+    if (s[0] === "[" || s[0] === "{") {
+      try { return JSON.parse(s); } catch (_) { return fb; }
+    }
+    return fb;
+  }
+
+  // shortcode で window に注入される想定
+  // EQUIP_DB: 配列でも文字列でも受ける
+  // ACC_DB/PET_DB: 現状は文字列で来てるので parse
+  const EQUIP_DB_RAW = parseMaybeJSON(window.EQUIP_DB, []);
+  const ACC_DB_RAW   = parseMaybeJSON(window.ACC_DB, []);
+  const PET_DB_RAW   = parseMaybeJSON(window.PET_DB, []);
+
+  // ここから先は「必ず配列」に寄せる
+  const EQUIP_DB = Array.isArray(EQUIP_DB_RAW) ? EQUIP_DB_RAW : [];
+  const ACC_DB   = Array.isArray(ACC_DB_RAW)   ? ACC_DB_RAW   : [];
+  const PET_DB   = Array.isArray(PET_DB_RAW)   ? PET_DB_RAW   : [];
 
   // --- inputs ---
   const shakerEl = $("shaker");
@@ -98,13 +126,41 @@ document.addEventListener("DOMContentLoaded", () => {
       if (it.slot != null) o.dataset.slot = String(it.slot || "");
       if (it.series != null) o.dataset.series = String(it.series || "");
       if (it.match_mul != null) o.dataset.matchMul = String(it.match_mul || 1.0);
-      o.dataset.payload = JSON.stringify(it);
+
+      // payload は JSON 化して埋め込む（HTML optionに保持）
+      try {
+        o.dataset.payload = JSON.stringify(it);
+      } catch (_) {
+        o.dataset.payload = "{}";
+      }
+
       sel.appendChild(o);
     });
   }
 
   function buildEquipSelects() {
     const bySlot = { weapon:[], head:[], body:[], arms:[], legs:[], shield:[] };
+
+    // EQUIP_DB が「ファイルパス配列」のまま来ている場合にも備える
+    // (今回の console では ['db/equip/test_body.md', ...] だった)
+    // その場合は option の title にパスを表示するだけにする。
+    const looksLikePaths = EQUIP_DB.length > 0 && typeof EQUIP_DB[0] === "string";
+    if (looksLikePaths) {
+      // slot別に分けようがないので、全部「武器」などに入れない（誤動作防止）
+      // とりあえず weapon に並べる等の暫定もできるが、ここは安全側に倒す
+      if (matchStatusEl) {
+        matchStatusEl.textContent = "装備DBがパス配列です（slot等の情報が無いので選択肢を生成できません）";
+      }
+      // 既存セレクトを空にして「なし」だけ入れる
+      fillSelect(equipSel.weapon, [], "-- 武器なし --");
+      fillSelect(equipSel.head,   [], "-- 頭なし --");
+      fillSelect(equipSel.body,   [], "-- 胴なし --");
+      fillSelect(equipSel.arms,   [], "-- 腕なし --");
+      fillSelect(equipSel.legs,   [], "-- 脚なし --");
+      fillSelect(equipSel.shield, [], "-- 盾なし --");
+      return;
+    }
+
     for (const it of EQUIP_DB) {
       const slot = String(it.slot || "").toLowerCase();
       if (bySlot[slot]) bySlot[slot].push(it);
@@ -265,6 +321,16 @@ document.addEventListener("DOMContentLoaded", () => {
 ③ equip強化=${equipEnh}
 アクセ強化=${accEnh}
 ④ matchMul=${matchMul}
+
+DB raw types:
+- EQUIP_DB typeof=${typeof window.EQUIP_DB}, isArray=${Array.isArray(window.EQUIP_DB)}
+- ACC_DB typeof=${typeof window.ACC_DB}, isArray=${Array.isArray(window.ACC_DB)}
+- PET_DB typeof=${typeof window.PET_DB}, isArray=${Array.isArray(window.PET_DB)}
+
+DB counts:
+- equip=${EQUIP_DB.length}
+- acc=${ACC_DB.length}
+- pet=${PET_DB.length}
 
 ①(protein_add)
 ${JSON.stringify(p.add, null, 2)}

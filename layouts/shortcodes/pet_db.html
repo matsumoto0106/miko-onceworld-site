@@ -1,18 +1,16 @@
 <script>
 window.PET_DB =
-{{- $sec := site.GetPage "db/pet-skill" -}}
-{{- if $sec -}}
-  {{- $arr := slice -}}
-  {{- range $sec.RegularPagesRecursive -}}
+{{- $pages := where site.RegularPages "Section" "db" -}}
+{{- $arr := slice -}}
+{{- range $pages -}}
+  {{- if eq .File.Dir "content/db/pet-skill/" -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "id" (.Params.id | default 0)
       "stages" (.Params.stages | default slice)
     ) -}}
   {{- end -}}
-  {{- $arr | jsonify -}}
-{{- else -}}
-  []
 {{- end -}}
+{{- $arr | jsonify -}}
 ;
 </script>

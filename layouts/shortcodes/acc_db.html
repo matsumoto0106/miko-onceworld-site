@@ -1,9 +1,8 @@
 <script>
 window.ACC_DB =
-{{- $pages := where site.RegularPages "Section" "db" -}}
 {{- $arr := slice -}}
-{{- range $pages -}}
-  {{- if eq .File.Dir "content/db/acc/" -}}
+{{- range site.RegularPages -}}
+  {{- if and .File (hasPrefix .File.Path "db/acc/") -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "flat_add" (.Params.flat_add | default dict)

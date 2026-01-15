@@ -1,0 +1,21 @@
+{{- $filter := .Get "filter" | default "" -}}
+{{- $limit  := (.Get "limit" | default "200") | int -}}
+
+<details style="margin:12px 0;">
+  <summary>デバッグ：AllPages File.Path（filter="{{ $filter }}", limit={{ $limit }}）</summary>
+
+  <pre style="white-space:pre-wrap; font-size:12px; line-height:1.4;">
+{{- $n := 0 -}}
+{{- range site.AllPages -}}
+  {{- if and (lt $n $limit) .File -}}
+    {{- $p := .File.Path -}}
+    {{- if or (eq $filter "") (in $p $filter) -}}
+{{ $p }}
+      {{- $n = add $n 1 -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+  </pre>
+
+  <p style="margin:6px 0 0; font-size:12px;">表示件数：{{ $n }}</p>
+</details>

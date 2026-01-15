@@ -2,6 +2,11 @@
 title: "主人公ステータス・シミュレーター"
 ---
 
+<!-- DB埋め込み（必ずJSより前） -->
+{{< equip_db >}}
+{{< pet_db >}}
+{{< acc_db >}}
+
 <div class="tool-box" id="status-sim">
   <h2>主人公ステータス・シミュレーター</h2>
 
@@ -138,11 +143,6 @@ title: "主人公ステータス・シミュレーター"
     </details>
   </section>
 </div>
-
-<!-- DB埋め込み -->
-{{< equip_db >}}
-{{< acc_db >}}
-{{< pet_db >}}
 
 {{< rawhtml >}}
 <script src="/js/status-sim.js"></script>

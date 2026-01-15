@@ -1,9 +1,9 @@
 <script>
 window.EQUIP_DB =
-{{- $sec := site.GetPage "section" "db/equip" -}}
+{{- $sec := site.GetPage "db/equip" -}}
 {{- if $sec -}}
   {{- $arr := slice -}}
-  {{- range sort $sec.Pages ".Title" "asc" -}}
+  {{- range $sec.RegularPagesRecursive -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "slot" (.Params.slot | default "")

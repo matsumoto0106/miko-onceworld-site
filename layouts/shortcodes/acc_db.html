@@ -1,9 +1,9 @@
 <script>
 window.ACC_DB =
-{{- $sec := site.GetPage "section" "db/acc" -}}
+{{- $sec := site.GetPage "db/acc" -}}
 {{- if $sec -}}
   {{- $arr := slice -}}
-  {{- range sort $sec.Pages ".Title" "asc" -}}
+  {{- range $sec.RegularPagesRecursive -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "flat_add" (.Params.flat_add | default dict)

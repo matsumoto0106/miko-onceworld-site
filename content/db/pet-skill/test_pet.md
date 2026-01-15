@@ -1,7 +1,6 @@
 +++
 title = "テストペット：攻撃支援"
 id = 1
-+++
 
 [[stages]]
 unlock_lv = 31
@@ -22,3 +21,4 @@ atk = 0.10
 unlock_lv = 181
 [stages.final_add]
 atk = 0.05
++++

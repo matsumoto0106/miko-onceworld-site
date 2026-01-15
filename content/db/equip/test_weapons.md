@@ -1,6 +1,9 @@
----
-title: "テストソード"
-slot: "weapon"
-base_add:
-  atk: 30
----
++++
+title = "テストソード"
++++
+
+slot = "weapon"
+series = "test-series"
+
+[base_add]
+atk = 50

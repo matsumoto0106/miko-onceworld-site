@@ -3,7 +3,7 @@ window.PET_DB =
 {{- $pages := where site.RegularPages "Section" "db" -}}
 {{- $arr := slice -}}
 {{- range $pages -}}
-  {{- if eq .File.Dir "content/db/pet-skill/" -}}
+  {{- if eq .File.Dir "db/pet-skill/" -}}
     {{- $arr = $arr | append (dict
       "title" .Title
       "id" (.Params.id | default 0)

@@ -1,326 +1,127 @@
-// static/js/status-sim.js
-// 基礎ステ=振り分けポイント（movなし）
-// プロテイン・シェイカー・装備・表表示・保存は維持
+const STATS = ["vit","spd","atk","int","def","mdef","luk","mov"];
+const BASE_STATS = ["vit","spd","atk","int","def","mdef","luk"];
+const PROTEIN_STATS = BASE_STATS;
+const SCALE_STATS = BASE_STATS; // mov除外
 
-const STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk", "mov"];
-const BASE_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];      // movなし
-const PROTEIN_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];   // movなし
-const $ = (id) => document.getElementById(id);
+const $ = id => document.getElementById(id);
 
 const SLOTS = [
-  { key: "weapon", label: "武器", indexUrl: "/db/equip/weapon/index.json", itemDir: "/db/equip/weapon/" },
-  { key: "head",   label: "頭",   indexUrl: "/db/equip/armor/head/index.json",   itemDir: "/db/equip/armor/head/" },
-  { key: "body",   label: "体",   indexUrl: "/db/equip/armor/body/index.json",   itemDir: "/db/equip/armor/body/" },
-  { key: "hands",  label: "腕",   indexUrl: "/db/equip/armor/hands/index.json",  itemDir: "/db/equip/armor/hands/" },
-  { key: "feet",   label: "足",   indexUrl: "/db/equip/armor/feet/index.json",   itemDir: "/db/equip/armor/feet/" },
-  { key: "shield", label: "盾",   indexUrl: "/db/equip/armor/shield/index.json", itemDir: "/db/equip/armor/shield/" },
+  { key:"weapon", index:"/db/equip/weapon/index.json", dir:"/db/equip/weapon/" },
+  { key:"head",   index:"/db/equip/armor/head/index.json", dir:"/db/equip/armor/head/" },
+  { key:"body",   index:"/db/equip/armor/body/index.json", dir:"/db/equip/armor/body/" },
+  { key:"hands",  index:"/db/equip/armor/hands/index.json", dir:"/db/equip/armor/hands/" },
+  { key:"feet",   index:"/db/equip/armor/feet/index.json", dir:"/db/equip/armor/feet/" },
+  { key:"shield", index:"/db/equip/armor/shield/index.json", dir:"/db/equip/armor/shield/" },
 ];
 
-// --- 配信パス対応 ---
-function getAssetBaseUrl() {
-  const scriptEl = document.currentScript;
-  if (!scriptEl || !scriptEl.src) return window.location.origin;
-  const u = new URL(scriptEl.src, window.location.href);
-  const basePath = u.pathname.replace(/\/js\/status-sim\.js$/, "");
-  return `${u.origin}${basePath}`;
-}
-const ASSET_BASE = getAssetBaseUrl();
-const abs = (p) => `${ASSET_BASE}${p}`;
+const STORAGE_KEY = "status_sim_state_v8_equip_scale";
 
-// --- localStorage ---
-const STORAGE_KEY = "status_sim_state_v7_points_no_mov";
-const saveState = (s) => localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-const loadState = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; } };
-const clearState = () => localStorage.removeItem(STORAGE_KEY);
+const n = v => Number.isFinite(+v) ? +v : 0;
+const zeroStats = () => Object.fromEntries(STATS.map(s=>[s,0]));
 
-// --- util ---
-const n = (v, fb = 0) => (Number.isFinite(Number(v)) ? Number(v) : fb);
-const clamp0 = (v) => Math.max(0, n(v, 0));
+const addStats = (a,b)=>{
+  const r={...a};
+  for(const k of STATS) r[k]+=b[k]||0;
+  return r;
+};
 
-function makeZeroStats() {
-  return Object.fromEntries(STATS.map((k) => [k, 0]));
-}
-function addStats(a, b) {
-  const out = { ...a };
-  for (const k of STATS) out[k] = (out[k] ?? 0) + (b?.[k] ?? 0);
-  return out;
-}
-
-// --- エラー表示（必要時のみ） ---
-function setErr(text) {
-  const el = $("errBox");
-  if (!el) return;
-  const msg = (text || "").trim();
-  el.textContent = msg;
-  el.classList.toggle("is-visible", msg.length > 0);
-}
-
-// --- 振り分けポイント ---
-function readBasePointTotal() {
-  return clamp0($("basePointTotal")?.value);
-}
-function applyBasePointTotal(v) {
-  const el = $("basePointTotal");
-  if (el) el.value = String(clamp0(v ?? 0));
-}
-function readBasePointsFromUI() {
-  const out = makeZeroStats();
-  for (const k of BASE_STATS) out[k] = clamp0($(`base_${k}`)?.value);
-  // mov は常に0
-  out.mov = 0;
-  return out;
-}
-function applyBasePointsToUI(stats) {
-  for (const k of BASE_STATS) {
-    const el = $(`base_${k}`);
-    if (el) el.value = String(clamp0(stats?.[k] ?? 0));
+const scaleEquip = (base, level)=>{
+  const r = zeroStats();
+  const mul = 1 + level * 0.1;
+  for(const k of SCALE_STATS){
+    r[k] = Math.floor((base[k]||0) * mul);
   }
-}
-function resetBasePointsUI() {
-  for (const k of BASE_STATS) {
-    const el = $(`base_${k}`);
-    if (el) el.value = "0";
-  }
-}
-function renderPointInfo(total, points) {
-  const used = BASE_STATS.reduce((s, k) => s + (points?.[k] ?? 0), 0);
-  const remain = total - used;
-  const info = $("basePointInfo");
-  if (info) info.textContent = `使用 ${used} / 残り ${remain}`;
-  return { used, remain };
-}
+  return r;
+};
 
-// --- シェイカー ---
-function readShakerFromUI() { return clamp0($("shakerCount")?.value); }
-function applyShakerToUI(v) { const el = $("shakerCount"); if (el) el.value = String(clamp0(v ?? 0)); }
-function shakerMultiplier(shakerCount) { return 1 + 0.01 * clamp0(shakerCount); }
+async function fetchJSON(p){ return (await fetch(p)).json(); }
+async function fetchText(p){ return await (await fetch(p)).text(); }
 
-// --- プロテイン（ステ別） ---
-function readProteinRawFromUI() {
-  const out = makeZeroStats();
-  for (const k of PROTEIN_STATS) out[k] = clamp0($(`protein_${k}`)?.value);
-  return out;
-}
-function applyProteinToUI(stats) {
-  for (const k of PROTEIN_STATS) {
-    const el = $(`protein_${k}`);
-    if (el) el.value = String(clamp0(stats?.[k] ?? 0));
-  }
-}
-function resetProteinUI() {
-  for (const k of PROTEIN_STATS) {
-    const el = $(`protein_${k}`);
-    if (el) el.value = "0";
-  }
-}
-function applyShakerToProtein(rawProtein, shakerCount) {
-  const out = makeZeroStats();
-  const mul = shakerMultiplier(shakerCount);
-  for (const k of PROTEIN_STATS) out[k] = Math.floor((rawProtein?.[k] ?? 0) * mul);
-  return out;
-}
-
-// --- TOML（簡易） ---
-function parseMiniToml(text) {
-  const lines = text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l && l !== "+++" && !l.startsWith("#"));
-
-  const item = { base_add: {} };
-  let section = "";
-
-  for (const line of lines) {
-    const sec = line.match(/^\[(.+?)\]$/);
-    if (sec) { section = sec[1]; continue; }
-
-    const kv = line.match(/^([A-Za-z0-9_]+)\s*=\s*(.+)$/);
-    if (!kv) continue;
-
-    const key = kv[1];
-    let raw = kv[2].trim();
-    if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
-
-    const value = n(raw, raw);
-    if (section === "base_add") item.base_add[key] = n(value, 0);
-    else item[key] = value;
-  }
-
-  item.id = item.id || item.title || "unknown";
-  return item;
-}
-async function loadIndex(path) {
-  const url = abs(path);
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`404: ${url}`);
-  return await res.json();
-}
-async function loadToml(dir, file) {
-  const url = abs(`${dir}${file}`);
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`404: ${url}`);
-  return parseMiniToml(await res.text());
-}
-function fillSelect(selectEl, items) {
-  selectEl.innerHTML = "";
-  selectEl.append(new Option("（なし）", ""));
-  for (const it of items) selectEl.append(new Option(it.title ?? it.id, it.id));
-}
-
-// --- 表 ---
-function buildTableRows() {
-  const tbody = $("statsTbody");
-  if (!tbody) return false;
-
-  tbody.innerHTML = "";
-  for (const k of STATS) {
-    const tr = document.createElement("tr");
-    tr.dataset.stat = k;
-
-    const tdName = document.createElement("td");
-    tdName.textContent = k;
-
-    const tdBase = document.createElement("td");
-    tdBase.className = "num";
-    tdBase.dataset.col = "base";
-
-    const tdEquip = document.createElement("td");
-    tdEquip.className = "num";
-    tdEquip.dataset.col = "equip";
-
-    const tdTotal = document.createElement("td");
-    tdTotal.className = "num";
-    tdTotal.dataset.col = "total";
-
-    tr.append(tdName, tdBase, tdEquip, tdTotal);
-    tbody.appendChild(tr);
-  }
-  return true;
-}
-function renderTable(basePlusProtein, equip, total) {
-  const tbody = $("statsTbody");
-  if (!tbody) return;
-
-  for (const tr of tbody.querySelectorAll("tr")) {
-    const k = tr.dataset.stat;
-    const b = basePlusProtein?.[k] ?? 0;
-    const e = equip?.[k] ?? 0;
-    const t = total?.[k] ?? 0;
-
-    tr.querySelector('[data-col="base"]').textContent = String(b);
-    tr.querySelector('[data-col="equip"]').textContent = String(e);
-    tr.querySelector('[data-col="total"]').textContent = String(t);
-
-    tr.classList.toggle("active", b !== 0 || e !== 0);
-  }
-}
-
-// --- main ---
-async function main() {
-  setErr("");
-
-  if (!buildTableRows()) {
-    setErr("statsTbody が見つかりません（status.md の置き換え漏れの可能性）");
-    return;
-  }
-
-  const saved = loadState();
-
-  // 装備ロード（失敗しても進行）
-  const slotItems = {};
-  const loadErrors = [];
-
-  for (const s of SLOTS) {
-    const sel = $(`select_${s.key}`);
-    slotItems[s.key] = [];
-
-    if (!sel) { loadErrors.push(`select_${s.key} が見つかりません`); continue; }
-
-    try {
-      const files = await loadIndex(s.indexUrl);
-      const items = [];
-      for (const f of files) items.push(await loadToml(s.itemDir, f));
-      slotItems[s.key] = items;
-
-      fillSelect(sel, items);
-      if (saved?.equip?.[s.key]) sel.value = saved.equip[s.key];
-    } catch (e) {
-      fillSelect(sel, []);
-      loadErrors.push(`${s.label} DB 読込失敗: ${String(e?.message ?? e)}`);
-    }
-
-    sel.addEventListener("change", recalc);
-  }
-
-  // 復元
-  applyBasePointTotal(saved?.basePointTotal);
-  applyBasePointsToUI(saved?.basePoints);
-  applyShakerToUI(saved?.shakerCount);
-  applyProteinToUI(saved?.proteinRaw);
-
-  // リスナー
-  $("basePointTotal")?.addEventListener("input", recalc);
-  for (const k of BASE_STATS) $(`base_${k}`)?.addEventListener("input", recalc);
-  for (const k of PROTEIN_STATS) $(`protein_${k}`)?.addEventListener("input", recalc);
-  $("shakerCount")?.addEventListener("input", recalc);
-
-  $("recalcBtn")?.addEventListener("click", recalc);
-  $("resetBtn")?.addEventListener("click", () => { resetBasePointsUI(); recalc(); });
-
-  $("clearSaveBtn")?.addEventListener("click", () => {
-    clearState();
-    applyBasePointTotal(0);
-    resetBasePointsUI();
-    resetProteinUI();
-    applyShakerToUI(0);
-    for (const s of SLOTS) {
-      const sel = $(`select_${s.key}`);
-      if (sel) sel.value = "";
-    }
-    recalc();
+function parseToml(t){
+  const o={base_add:{}};
+  let sec="";
+  t.split(/\r?\n/).forEach(l=>{
+    l=l.trim(); if(!l||l==="+++"||l.startsWith("#")) return;
+    const s=l.match(/^\[(.+)\]$/); if(s){sec=s[1];return;}
+    const m=l.match(/^(\w+)\s*=\s*(.+)$/); if(!m)return;
+    const v=isNaN(m[2])?m[2].replace(/"/g,""):Number(m[2]);
+    sec==="base_add"?o.base_add[m[1]]=v:o[m[1]]=v;
   });
+  o.id=o.id||o.title;
+  return o;
+}
 
-  function recalc() {
-    const basePointTotal = readBasePointTotal();
-    const basePoints = readBasePointsFromUI();
-    const { remain } = renderPointInfo(basePointTotal, basePoints);
+function buildTable(){
+  const tb=$("statsTbody"); tb.innerHTML="";
+  STATS.forEach(s=>{
+    tb.insertAdjacentHTML("beforeend",
+      `<tr data-s="${s}">
+        <td>${s}</td>
+        <td class="b"></td>
+        <td class="e"></td>
+        <td class="t"></td>
+      </tr>`);
+  });
+}
 
-    const shakerCount = readShakerFromUI();
-    const proteinRaw = readProteinRawFromUI();
-    const proteinApplied = applyShakerToProtein(proteinRaw, shakerCount);
+document.addEventListener("DOMContentLoaded",async()=>{
+  buildTable();
 
-    const basePlusProtein = addStats(basePoints, proteinApplied);
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}");
+  const equipDB={};
 
-    let equipSum = makeZeroStats();
-    const equipState = {};
+  for(const s of SLOTS){
+    const sel=$(`select_${s.key}`);
+    const lv =$(`level_${s.key}`);
+    const files = await fetchJSON(s.index);
+    equipDB[s.key]=[];
+    for(const f of files){
+      equipDB[s.key].push(parseToml(await fetchText(s.dir+f)));
+    }
+    sel.innerHTML='<option value="">(なし)</option>';
+    equipDB[s.key].forEach(i=>sel.add(new Option(i.title,i.id)));
+    sel.value=saved.equip?.[s.key]?.id||"";
+    lv.value =saved.equip?.[s.key]?.lv||0;
+    sel.onchange=lv.oninput=recalc;
+  }
 
-    for (const s of SLOTS) {
-      const sel = $(`select_${s.key}`);
-      const id = sel?.value || "";
-      equipState[s.key] = id;
+  function recalc(){
+    let base=zeroStats();
+    BASE_STATS.forEach(k=>base[k]=n($(`base_${k}`)?.value));
 
-      const chosen = (slotItems[s.key] || []).find((it) => it.id === id);
-      equipSum = addStats(equipSum, chosen?.base_add ?? {});
+    let protein=zeroStats();
+    const mul=1+n($("shakerCount")?.value)*0.01;
+    PROTEIN_STATS.forEach(k=>{
+      protein[k]=Math.floor(n($(`protein_${k}`)?.value)*mul);
+    });
+
+    let equipSum=zeroStats();
+    const equipState={};
+
+    for(const s of SLOTS){
+      const id=$(`select_${s.key}`).value;
+      const lv=n($(`level_${s.key}`).value);
+      equipState[s.key]={id,lv};
+      const it=equipDB[s.key].find(x=>x.id===id);
+      if(it){
+        equipSum=addStats(equipSum,scaleEquip(it.base_add,lv));
+      }
     }
 
-    const total = addStats(basePlusProtein, equipSum);
+    const total=addStats(addStats(base,protein),equipSum);
 
-    // エラー表示：DBエラー or ポイント超過
-    const errs = [];
-    if (loadErrors.length) errs.push(...loadErrors);
-    if (remain < 0) errs.push(`ポイント超過：残り ${remain}`);
-    setErr(errs.join("\n"));
+    document.querySelectorAll("#statsTbody tr").forEach(tr=>{
+      const k=tr.dataset.s;
+      tr.querySelector(".b").textContent=(base[k]||0)+(protein[k]||0);
+      tr.querySelector(".e").textContent=equipSum[k]||0;
+      tr.querySelector(".t").textContent=total[k]||0;
+    });
 
-    renderTable(basePlusProtein, equipSum, total);
-    saveState({ basePointTotal, basePoints, shakerCount, proteinRaw, equip: equipState });
+    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+      equip:equipState,
+      base,proteinRaw:protein
+    }));
   }
 
   recalc();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  main().catch((e) => {
-    console.error(e);
-    setErr(String(e?.message ?? e));
-  });
 });

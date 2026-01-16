@@ -32,6 +32,7 @@ title: "主人公ステータス・シミュレーター"
   </div>
 
   <div class="note" id="proteinInfo"></div>
+  <div class="error" id="errBox"></div>
 
   <hr />
 
@@ -74,9 +75,25 @@ title: "主人公ステータス・シミュレーター"
   .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin: 8px 0; }
   .hint { opacity: .75; font-size: .95em; margin: 6px 0 8px; }
   .note { margin: 8px 0 0; opacity: .85; }
+  .error { margin: 8px 0 0; color: #b00020; white-space: pre-wrap; }
 
   .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
   .grid label { display:flex; justify-content:space-between; gap: 8px; align-items:center; }
   .grid input { width: 72px; }
 
-  .protein-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 6px 
+  .protein-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 6px 0 8px; }
+  .protein-grid label { display:flex; justify-content:space-between; align-items:center; gap: 10px; }
+  .protein-grid input { width: 96px; }
+
+  .equip-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 8px 0; }
+  .equip-grid label { display:flex; justify-content:space-between; align-items:center; gap: 10px; }
+  .equip-grid select { min-width: 140px; }
+
+  .stats-table { width:100%; border-collapse: collapse; }
+  .stats-table th, .stats-table td { border: 1px solid rgba(0,0,0,0.15); padding: 8px 10px; }
+  .stats-table th { background: rgba(0,0,0,0.05); text-align: left; }
+  .stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .stats-table tr.active { background: rgba(255, 230, 150, 0.35); }
+</style>
+
+<script src="/js/status-sim.js"></script>

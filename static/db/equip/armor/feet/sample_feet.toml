@@ -1,0 +1,7 @@
++++
+title = "サンプルブーツ"
+slot = "feet"
+
+[base_add]
+spd = 1
++++

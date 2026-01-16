@@ -1,8 +1,9 @@
 // static/js/status-sim.js
-// 機能：武器＋防具5種の選択、基礎ステ入力、合計表示
-// 追加：localStorage 保存/復元 + 表形式表示（基礎/装備/合計）
+// 機能：武器＋防具5種の選択、基礎ステ入力、合計表示（表）
+// 追加：localStorage 保存/復元 + プロテイン所持数（mov以外に補正）
 
 const STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk", "mov"];
+const PROTEIN_AFFECTS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"]; // mov除外
 const $ = (id) => document.getElementById(id);
 
 const SLOTS = [
@@ -26,7 +27,7 @@ const ASSET_BASE = getAssetBaseUrl();
 const abs = (p) => `${ASSET_BASE}${p}`;
 
 // ====== localStorage ======
-const STORAGE_KEY = "status_sim_state_v2_table";
+const STORAGE_KEY = "status_sim_state_v3_table_protein";
 
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -48,6 +49,15 @@ function makeZeroStats() {
 function addStats(a, b) {
   const out = { ...a };
   for (const k of STATS) out[k] = (out[k] ?? 0) + (b?.[k] ?? 0);
+  return out;
+}
+
+// プロテイン補正（今回は「所持数＝各ステに加算」として実装）
+function proteinToStats(count) {
+  const out = makeZeroStats();
+  const c = Math.max(0, n(count, 0));
+  for (const k of PROTEIN_AFFECTS) out[k] = c;
+  // mov は 0 のまま
   return out;
 }
 
@@ -117,6 +127,14 @@ function resetBaseStatsUI() {
   }
 }
 
+function readProteinCountFromUI() {
+  return Math.max(0, n($("proteinCount")?.value, 0));
+}
+function applyProteinCountToUI(v) {
+  const el = $("proteinCount");
+  if (el) el.value = String(Math.max(0, n(v, 0)));
+}
+
 // ====== UI（表） ======
 function buildTableRows() {
   const tbody = $("statsTbody");
@@ -147,13 +165,13 @@ function buildTableRows() {
   }
 }
 
-function renderTable(base, equip, total) {
+function renderTable(basePlusProtein, equip, total) {
   const tbody = $("statsTbody");
   if (!tbody) return;
 
   for (const tr of tbody.querySelectorAll("tr")) {
     const k = tr.dataset.stat;
-    const b = base?.[k] ?? 0;
+    const b = basePlusProtein?.[k] ?? 0;
     const e = equip?.[k] ?? 0;
     const t = total?.[k] ?? 0;
 
@@ -161,7 +179,6 @@ function renderTable(base, equip, total) {
     tr.querySelector('[data-col="equip"]').textContent = String(e);
     tr.querySelector('[data-col="total"]').textContent = String(t);
 
-    // 変化がある行をハイライト（装備が付いてる or 基礎が0じゃない）
     tr.classList.toggle("active", b !== 0 || e !== 0);
   }
 }
@@ -171,6 +188,7 @@ async function main() {
   buildTableRows();
 
   const saved = loadState();
+  const proteinInfo = $("proteinInfo");
 
   const slotItems = {};
   for (const s of SLOTS) {
@@ -188,8 +206,10 @@ async function main() {
   }
 
   applyBaseStatsToUI(saved?.base);
+  applyProteinCountToUI(saved?.proteinCount);
 
   for (const k of STATS) $(`base_${k}`)?.addEventListener("input", recalc);
+  $("proteinCount")?.addEventListener("input", recalc);
 
   $("recalcBtn")?.addEventListener("click", recalc);
   $("resetBtn")?.addEventListener("click", () => { resetBaseStatsUI(); recalc(); });
@@ -197,6 +217,7 @@ async function main() {
   $("clearSaveBtn")?.addEventListener("click", () => {
     clearState();
     resetBaseStatsUI();
+    applyProteinCountToUI(0);
     for (const s of SLOTS) {
       const sel = $(`select_${s.key}`);
       if (sel) sel.value = "";
@@ -205,7 +226,13 @@ async function main() {
   });
 
   function recalc() {
-    const base = readBaseStatsFromUI();
+    const baseRaw = readBaseStatsFromUI();
+
+    const proteinCount = readProteinCountFromUI();
+    const proteinStats = proteinToStats(proteinCount);
+
+    // 表の「基礎」列は “基礎＋プロテイン” を表示
+    const basePlusProtein = addStats(baseRaw, proteinStats);
 
     let equipSum = makeZeroStats();
     const equipState = {};
@@ -217,10 +244,17 @@ async function main() {
       equipSum = addStats(equipSum, chosen?.base_add ?? {});
     }
 
-    const total = addStats(base, equipSum);
+    const total = addStats(basePlusProtein, equipSum);
 
-    renderTable(base, equipSum, total);
-    saveState({ base, equip: equipState });
+    if (proteinInfo) {
+      proteinInfo.textContent =
+        proteinCount > 0
+          ? `プロテイン補正：所持数 ${proteinCount} → mov以外に +${proteinCount}`
+          : `プロテイン補正：なし（0）`;
+    }
+
+    renderTable(basePlusProtein, equipSum, total);
+    saveState({ base: baseRaw, proteinCount, equip: equipState });
   }
 
   recalc();

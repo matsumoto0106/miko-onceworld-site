@@ -54,45 +54,33 @@
   <hr />
   <h2>装備</h2>
   <div class="equip-grid">
-  <label>武器
-      <select id="select_weapon"></select>
-    </label>
-<p><label>頭
-<select id="select_head"></select>
-</label></p>
-<p><label>体
-<select id="select_body"></select>
-</label></p>
-<p><label>腕
-<select id="select_hands"></select>
-</label></p>
-<p><label>足
-<select id="select_feet"></select>
-</label></p>
-<p><label>盾
-<select id="select_shield"></select>
-</label></p>
+    <label>武器 <select id="select_weapon"></select></label>
+    <label>頭 <select id="select_head"></select></label>
+    <label>体 <select id="select_body"></select></label>
+    <label>腕 <select id="select_hands"></select></label>
+    <label>足 <select id="select_feet"></select></label>
+    <label>盾 <select id="select_shield"></select></label>
   </div>
   <div class="row">
     <button id="recalcBtn" type="button">再計算</button>
     <button id="resetBtn" type="button">基礎ステを0に戻す</button>
+    <button id="clearSaveBtn" type="button">保存をクリア</button>
   </div>
   <hr />
-  <h2>結果</h2>
-  <div class="result-grid">
-    <div>
-      <div>基礎ステ</div>
-      <pre id="baseBox">{}</pre>
-    </div>
-  <div>
-      <div>装備加算（全枠合計 / base_add）</div>
-      <pre id="equipBox">{}</pre>
-    </div>
-  <div>
-      <div>合計（基礎＋装備）</div>
-      <pre id="totalBox">{}</pre>
-    </div>
-  </div>
+  <h2>結果（表）</h2>
+  <table class="stats-table">
+    <thead>
+      <tr>
+        <th>ステ</th>
+        <th>基礎</th>
+        <th>装備</th>
+        <th>合計</th>
+      </tr>
+    </thead>
+    <tbody id="statsTbody">
+      <!-- JSで行を生成 -->
+    </tbody>
+  </table>
 </div>
 <style>
   .sim { max-width: 980px; }
@@ -105,8 +93,11 @@
   .equip-grid label { display:flex; justify-content:space-between; align-items:center; gap: 10px; }
   .equip-grid select { min-width: 140px; }
 
-  .result-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
-  pre { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; overflow:auto; }
+  .stats-table { width:100%; border-collapse: collapse; }
+  .stats-table th, .stats-table td { border: 1px solid rgba(0,0,0,0.15); padding: 8px 10px; }
+  .stats-table th { background: rgba(0,0,0,0.05); text-align: left; }
+  .stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .stats-table tr.active { background: rgba(255, 230, 150, 0.35); }
 </style>
 <script src="https://matsumoto0106.github.io/miko-onceworld-site/js/status-sim.js"></script>
 

@@ -18,14 +18,10 @@ title: "主人公ステータス・シミュレーター"
 
   <hr />
 
-  <h2>プロテイン（ステータス別）</h2>
-  <div class="hint">※ mov は対象外（入力欄なし）</div>
+  <h2>プロテイン</h2>
 
   <div class="row">
-    <label>プロテインシェイカー（共通）
-      <input id="shakerCount" type="number" inputmode="numeric" min="0" value="0" />
-    </label>
-    <div class="hint">所持数 1 につきプロテイン効果 +1%</div>
+    <label>shaker <input id="shakerCount" type="number" inputmode="numeric" min="0" value="0" /></label>
   </div>
 
   <div class="protein-grid">
@@ -38,7 +34,6 @@ title: "主人公ステータス・シミュレーター"
     <label>luk <input id="protein_luk" type="number" inputmode="numeric" min="0" value="0" /></label>
   </div>
 
-  <div class="note" id="proteinInfo"></div>
   <div class="error" id="errBox"></div>
 
   <hr />
@@ -80,9 +75,6 @@ title: "主人公ステータス・シミュレーター"
 <style>
   .sim { max-width: 980px; }
   .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin: 8px 0; }
-  .hint { opacity: .75; font-size: .95em; margin: 6px 0 8px; }
-  .note { margin: 8px 0 0; opacity: .85; white-space: pre-wrap; }
-  .error { margin: 8px 0 0; color: #b00020; white-space: pre-wrap; }
 
   .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
   .grid label { display:flex; justify-content:space-between; gap: 8px; align-items:center; }
@@ -103,6 +95,10 @@ title: "主人公ステータス・シミュレーター"
   .stats-table th { background: rgba(0,0,0,0.05); text-align: left; }
   .stats-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .stats-table tr.active { background: rgba(255, 230, 150, 0.35); }
+
+  /* エラーは通常非表示（出た時だけ表示） */
+  .error { margin: 8px 0 0; color: #b00020; white-space: pre-wrap; display: none; }
+  .error.is-visible { display: block; }
 </style>
 
 <script src="/js/status-sim.js"></script>

@@ -1,0 +1,8 @@
++++
+title = "サンプルアーマー"
+slot = "body"
+
+[base_add]
+def = 10
+mdef = 3
++++

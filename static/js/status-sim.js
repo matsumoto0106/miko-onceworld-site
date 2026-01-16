@@ -1,9 +1,9 @@
 // static/js/status-sim.js
 // 機能：武器＋防具5種の選択、基礎ステ入力、合計表示（表）
-// 追加：localStorage 保存/復元 + プロテイン所持数（mov以外に補正）
+// 追加：localStorage 保存/復元 + プロテイン（ステ別7種：mov除外）
 
 const STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk", "mov"];
-const PROTEIN_AFFECTS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"]; // mov除外
+const PROTEIN_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"]; // movなし
 const $ = (id) => document.getElementById(id);
 
 const SLOTS = [
@@ -27,7 +27,7 @@ const ASSET_BASE = getAssetBaseUrl();
 const abs = (p) => `${ASSET_BASE}${p}`;
 
 // ====== localStorage ======
-const STORAGE_KEY = "status_sim_state_v3_table_protein";
+const STORAGE_KEY = "status_sim_state_v4_table_protein_per_stat";
 
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -42,6 +42,7 @@ function clearState() {
 
 // ====== util ======
 const n = (v, fb = 0) => (Number.isFinite(Number(v)) ? Number(v) : fb);
+const clamp0 = (v) => Math.max(0, n(v, 0));
 
 function makeZeroStats() {
   return Object.fromEntries(STATS.map((k) => [k, 0]));
@@ -52,13 +53,32 @@ function addStats(a, b) {
   return out;
 }
 
-// プロテイン補正（今回は「所持数＝各ステに加算」として実装）
-function proteinToStats(count) {
+// ====== プロテイン（ステ別） ======
+function readProteinFromUI() {
   const out = makeZeroStats();
-  const c = Math.max(0, n(count, 0));
-  for (const k of PROTEIN_AFFECTS) out[k] = c;
+  for (const k of PROTEIN_STATS) out[k] = clamp0($(`protein_${k}`)?.value);
   // mov は 0 のまま
   return out;
+}
+function applyProteinToUI(stats) {
+  for (const k of PROTEIN_STATS) {
+    const el = $(`protein_${k}`);
+    if (el) el.value = String(clamp0(stats?.[k] ?? 0));
+  }
+}
+function resetProteinUI() {
+  for (const k of PROTEIN_STATS) {
+    const el = $(`protein_${k}`);
+    if (el) el.value = "0";
+  }
+}
+function proteinSummaryText(p) {
+  const parts = [];
+  for (const k of PROTEIN_STATS) {
+    const v = p?.[k] ?? 0;
+    if (v !== 0) parts.push(`${k}+${v}`);
+  }
+  return parts.length ? `プロテイン補正：${parts.join(" / ")}（movは対象外）` : `プロテイン補正：なし（movは対象外）`;
 }
 
 // ====== TOML（簡易） ======
@@ -125,14 +145,6 @@ function resetBaseStatsUI() {
     const el = $(`base_${k}`);
     if (el) el.value = "0";
   }
-}
-
-function readProteinCountFromUI() {
-  return Math.max(0, n($("proteinCount")?.value, 0));
-}
-function applyProteinCountToUI(v) {
-  const el = $("proteinCount");
-  if (el) el.value = String(Math.max(0, n(v, 0)));
 }
 
 // ====== UI（表） ======
@@ -206,10 +218,10 @@ async function main() {
   }
 
   applyBaseStatsToUI(saved?.base);
-  applyProteinCountToUI(saved?.proteinCount);
+  applyProteinToUI(saved?.protein);
 
   for (const k of STATS) $(`base_${k}`)?.addEventListener("input", recalc);
-  $("proteinCount")?.addEventListener("input", recalc);
+  for (const k of PROTEIN_STATS) $(`protein_${k}`)?.addEventListener("input", recalc);
 
   $("recalcBtn")?.addEventListener("click", recalc);
   $("resetBtn")?.addEventListener("click", () => { resetBaseStatsUI(); recalc(); });
@@ -217,7 +229,7 @@ async function main() {
   $("clearSaveBtn")?.addEventListener("click", () => {
     clearState();
     resetBaseStatsUI();
-    applyProteinCountToUI(0);
+    resetProteinUI();
     for (const s of SLOTS) {
       const sel = $(`select_${s.key}`);
       if (sel) sel.value = "";
@@ -227,12 +239,8 @@ async function main() {
 
   function recalc() {
     const baseRaw = readBaseStatsFromUI();
-
-    const proteinCount = readProteinCountFromUI();
-    const proteinStats = proteinToStats(proteinCount);
-
-    // 表の「基礎」列は “基礎＋プロテイン” を表示
-    const basePlusProtein = addStats(baseRaw, proteinStats);
+    const protein = readProteinFromUI();
+    const basePlusProtein = addStats(baseRaw, protein);
 
     let equipSum = makeZeroStats();
     const equipState = {};
@@ -246,15 +254,10 @@ async function main() {
 
     const total = addStats(basePlusProtein, equipSum);
 
-    if (proteinInfo) {
-      proteinInfo.textContent =
-        proteinCount > 0
-          ? `プロテイン補正：所持数 ${proteinCount} → mov以外に +${proteinCount}`
-          : `プロテイン補正：なし（0）`;
-    }
+    if (proteinInfo) proteinInfo.textContent = proteinSummaryText(protein);
 
     renderTable(basePlusProtein, equipSum, total);
-    saveState({ base: baseRaw, proteinCount, equip: equipState });
+    saveState({ base: baseRaw, protein, equip: equipState });
   }
 
   recalc();

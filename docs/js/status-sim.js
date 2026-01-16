@@ -2,42 +2,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const STATS = ["vit","spd","atk","int","def","mdef","luk","mov"];
   const $ = (id) => document.getElementById(id);
 
-  const n = (v, fb=0) => {
+  const n = (v, fb = 0) => {
     const x = Number(v);
     return Number.isFinite(x) ? x : fb;
   };
 
   // =========================
-  // DB normalize (今回の修正の核)
+  // DB normalize
   // - 配列: そのまま
-  // - 文字列: JSON.parse して配列/オブジェクトにする
-  // - それ以外/失敗: fallback
+  // - 文字列(JSON): JSON.parse
+  // - それ以外: fallback
   // =========================
   function parseMaybeJSON(v, fb) {
-    if (Array.isArray(v) || (v && typeof v === "object")) return v;
+    if (Array.isArray(v)) return v;
+    if (v && typeof v === "object") return v;
     if (typeof v !== "string") return fb;
 
     const s = v.trim();
     if (!s) return fb;
-
-    // よくあるケース: "[]", "[{...}]" など
     if (s[0] === "[" || s[0] === "{") {
       try { return JSON.parse(s); } catch (_) { return fb; }
     }
     return fb;
   }
 
-  // shortcode で window に注入される想定
-  // EQUIP_DB: 配列でも文字列でも受ける
-  // ACC_DB/PET_DB: 現状は文字列で来てるので parse
   const EQUIP_DB_RAW = parseMaybeJSON(window.EQUIP_DB, []);
   const ACC_DB_RAW   = parseMaybeJSON(window.ACC_DB, []);
   const PET_DB_RAW   = parseMaybeJSON(window.PET_DB, []);
 
-  // ここから先は「必ず配列」に寄せる
   const EQUIP_DB = Array.isArray(EQUIP_DB_RAW) ? EQUIP_DB_RAW : [];
-  const ACC_DB   = Array.isArray(ACC_DB_RAW)   ? ACC_DB_RAW   : [];
-  const PET_DB   = Array.isArray(PET_DB_RAW)   ? PET_DB_RAW   : [];
+  const ACC_DB   = Array.isArray(ACC_DB_RAW) ? ACC_DB_RAW : [];
+  const PET_DB   = Array.isArray(PET_DB_RAW) ? PET_DB_RAW : [];
 
   // --- inputs ---
   const shakerEl = $("shaker");
@@ -72,11 +67,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const outRealMdef = $("out-realmdef");
   const outDebug = $("out-debug");
 
-  // 必須要素チェック（ここで落ちるなら「DOMが無い」）
+  // ページ違いで動かないように（最低限）
   if (!calcBtn) return;
 
   // ---------- helpers ----------
-  function addDict(dst, src, mul=1) {
+  function addDict(dst, src, mul = 1) {
     for (const k of Object.keys(src || {})) dst[k] = (dst[k] || 0) + n(src[k]) * mul;
   }
 
@@ -111,7 +106,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---------- UI build ----------
   function fillSelect(sel, items, placeholderText) {
+    // ここで落ちると全部止まるので null は安全に無視
     if (!sel) return;
+
     sel.innerHTML = "";
 
     const p = document.createElement("option");
@@ -119,39 +116,32 @@ document.addEventListener("DOMContentLoaded", () => {
     p.textContent = placeholderText;
     sel.appendChild(p);
 
-    items.forEach((it, idx) => {
+    (items || []).forEach((it, idx) => {
       const o = document.createElement("option");
       o.value = String(idx);
-      o.textContent = it.title || "(no title)";
-      if (it.slot != null) o.dataset.slot = String(it.slot || "");
-      if (it.series != null) o.dataset.series = String(it.series || "");
-      if (it.match_mul != null) o.dataset.matchMul = String(it.match_mul || 1.0);
 
-      // payload は JSON 化して埋め込む（HTML optionに保持）
-      try {
-        o.dataset.payload = JSON.stringify(it);
-      } catch (_) {
-        o.dataset.payload = "{}";
-      }
+      // title が無いデータでも落とさない
+      o.textContent = it?.title ? String(it.title) : "(no title)";
+
+      if (it?.slot != null) o.dataset.slot = String(it.slot || "");
+      if (it?.series != null) o.dataset.series = String(it.series || "");
+      if (it?.match_mul != null) o.dataset.matchMul = String(it.match_mul || 1.0);
+
+      // payload は option に保持
+      try { o.dataset.payload = JSON.stringify(it); }
+      catch (_) { o.dataset.payload = "{}"; }
 
       sel.appendChild(o);
     });
   }
 
   function buildEquipSelects() {
-    const bySlot = { weapon:[], head:[], body:[], arms:[], legs:[], shield:[] };
-
-    // EQUIP_DB が「ファイルパス配列」のまま来ている場合にも備える
-    // (今回の console では ['db/equip/test_body.md', ...] だった)
-    // その場合は option の title にパスを表示するだけにする。
+    // EQUIP_DB が「文字列配列」なら（＝パス配列等）安全側で埋めない
     const looksLikePaths = EQUIP_DB.length > 0 && typeof EQUIP_DB[0] === "string";
     if (looksLikePaths) {
-      // slot別に分けようがないので、全部「武器」などに入れない（誤動作防止）
-      // とりあえず weapon に並べる等の暫定もできるが、ここは安全側に倒す
       if (matchStatusEl) {
-        matchStatusEl.textContent = "装備DBがパス配列です（slot等の情報が無いので選択肢を生成できません）";
+        matchStatusEl.textContent = "装備DBがパス配列です（slot等が無いので候補を生成できません）";
       }
-      // 既存セレクトを空にして「なし」だけ入れる
       fillSelect(equipSel.weapon, [], "-- 武器なし --");
       fillSelect(equipSel.head,   [], "-- 頭なし --");
       fillSelect(equipSel.body,   [], "-- 胴なし --");
@@ -161,10 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const bySlot = { weapon:[], head:[], body:[], arms:[], legs:[], shield:[] };
     for (const it of EQUIP_DB) {
-      const slot = String(it.slot || "").toLowerCase();
+      const slot = String(it?.slot || "").toLowerCase();
       if (bySlot[slot]) bySlot[slot].push(it);
     }
+
     fillSelect(equipSel.weapon, bySlot.weapon, "-- 武器なし --");
     fillSelect(equipSel.head,   bySlot.head,   "-- 頭なし --");
     fillSelect(equipSel.body,   bySlot.body,   "-- 胴なし --");
@@ -208,13 +200,20 @@ document.addEventListener("DOMContentLoaded", () => {
     for (const [slot, sel] of Object.entries(equipSel)) {
       const opt = sel?.options?.[sel.selectedIndex];
       if (!opt || !opt.value) { picks[slot] = null; continue; }
-      picks[slot] = JSON.parse(opt.dataset.payload || "{}");
-      const base = picks[slot].base_add || {};
+
+      let item = {};
+      try { item = JSON.parse(opt.dataset.payload || "{}"); }
+      catch (_) { item = {}; }
+
+      picks[slot] = item;
+
+      const base = item.base_add || {};
       for (const k of Object.keys(base)) add[k] += equipScale(n(base[k]), enh);
     }
     return { add, picks };
   }
 
+  // ④ match bonus（防具5部位が同シリーズなら、そのシリーズの match_mul を適用）
   function calcMatchMul(picks) {
     const armorSlots = ["head","body","arms","legs","shield"];
     const series = armorSlots.map(s => picks[s]?.series || "").filter(v => v);
@@ -234,6 +233,9 @@ document.addEventListener("DOMContentLoaded", () => {
     return mul;
   }
 
+  // ⑤ flat add (アクセ実数 + ペット実数)
+  // ⑥ rate sum
+  // ⑦ final rate sum
   function collectAcc(enh) {
     const flat = {}, rate = {}, final = {};
     STATS.forEach(k => { flat[k]=0; rate[k]=0; final[k]=0; });
@@ -241,7 +243,10 @@ document.addEventListener("DOMContentLoaded", () => {
     accSel.forEach(sel => {
       const opt = sel?.options?.[sel.selectedIndex];
       if (!opt || !opt.value) return;
-      const it = JSON.parse(opt.dataset.payload || "{}");
+
+      let it = {};
+      try { it = JSON.parse(opt.dataset.payload || "{}"); }
+      catch (_) { it = {}; }
 
       for (const k of Object.keys(it.flat_add || {}))  flat[k]  += accFlatScale(n(it.flat_add[k]), enh);
       for (const k of Object.keys(it.rate_add || {}))  rate[k]  += accRateScale(n(it.rate_add[k]), enh);
@@ -264,7 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (petStageLabel[i]) petStageLabel[i].textContent = `段階：${stage}`;
       if (!opt || !opt.value) continue;
 
-      const pet = JSON.parse(opt.dataset.payload || "{}");
+      let pet = {};
+      try { pet = JSON.parse(opt.dataset.payload || "{}"); }
+      catch (_) { pet = {}; }
+
       const stages = Array.isArray(pet.stages) ? pet.stages : [];
 
       for (let k=0; k<Math.min(stage, stages.length); k++) {
@@ -283,46 +291,49 @@ document.addEventListener("DOMContentLoaded", () => {
     const equipEnh = Math.max(0, n(equipEnhEl?.value, 0));
     const accEnh = Math.max(0, n(accEnhEl?.value, 0));
 
-    const p = collectProtein();
-    const t = collectPoints();
-    const e = collectEquip(equipEnh);
-    const matchMul = calcMatchMul(e.picks);
+    const p = collectProtein();      // ①
+    const t = collectPoints();       // ②
+    const e = collectEquip(equipEnh);// ③
+    const matchMul = calcMatchMul(e.picks); // ④
 
-    const acc = collectAcc(accEnh);
-    const pets = collectPets();
+    const acc = collectAcc(accEnh);  // ⑤〜⑦(アクセ)
+    const pets = collectPets();      // ⑤〜⑦(ペット)
 
     const s1 = {}, sCore = {}, sPlusFlat = {}, sumRate = {}, sumFinal = {}, result = {};
 
     STATS.forEach(k => {
+      // (①+②+③)
       s1[k] = (n(p.add[k]) + n(t.add[k]) + n(e.add[k]));
+      // ×④
       sCore[k] = s1[k] * matchMul;
 
+      // +⑤
       const flat5 = n(acc.flat[k]) + n(pets.flat[k]);
       sPlusFlat[k] = sCore[k] + flat5;
 
+      // ×⑥ ×⑦
       sumRate[k] = n(acc.rate[k]) + n(pets.rate[k]);
       sumFinal[k] = n(acc.final[k]) + n(pets.final[k]);
 
       const mul6 = rateMul(sumRate[k]);
       const mul7 = rateMul(sumFinal[k]);
 
+      // Q1: 最後に切り捨て
       result[k] = Math.floor(sPlusFlat[k] * mul6 * mul7);
     });
 
     STATS.forEach(k => { if (out[k]) out[k].textContent = String(result[k]); });
 
+    // 実DEF / 実MDEF（式は後で差し替え）
     if (outRealDef) outRealDef.textContent = "---";
     if (outRealMdef) outRealMdef.textContent = "---";
 
+    // 検算用（長いけど “困った時だけ見る” 用）
     if (outDebug) {
       outDebug.textContent =
 `式：(((①+②+③)×④)+⑤)×⑥×⑦
-① shaker=${shaker}
-③ equip強化=${equipEnh}
-アクセ強化=${accEnh}
-④ matchMul=${matchMul}
 
-DB raw types:
+DB types:
 - EQUIP_DB typeof=${typeof window.EQUIP_DB}, isArray=${Array.isArray(window.EQUIP_DB)}
 - ACC_DB typeof=${typeof window.ACC_DB}, isArray=${Array.isArray(window.ACC_DB)}
 - PET_DB typeof=${typeof window.PET_DB}, isArray=${Array.isArray(window.PET_DB)}
@@ -331,6 +342,11 @@ DB counts:
 - equip=${EQUIP_DB.length}
 - acc=${ACC_DB.length}
 - pet=${PET_DB.length}
+
+④ matchMul=${matchMul}
+① shaker=${shaker}
+③ equip強化=${equipEnh}
+アクセ強化=${accEnh}
 
 ①(protein_add)
 ${JSON.stringify(p.add, null, 2)}
@@ -342,7 +358,7 @@ ${JSON.stringify(t.add, null, 2)}
 ${JSON.stringify(e.add, null, 2)}
 
 ⑤(flat_add = acc + pet)
-${JSON.stringify(Object.fromEntries(STATS.map(k => [k, n(acc.flat[k])+n(pets.flat[k])])), null, 2)}
+${JSON.stringify(Object.fromEntries(STATS.map(k => [k, n(acc.flat[k]) + n(pets.flat[k])])), null, 2)}
 
 ⑥(rate_sum)
 ${JSON.stringify(sumRate, null, 2)}
@@ -379,7 +395,9 @@ ${JSON.stringify(result, null, 2)}
   }
 
   // init
+  // ※ここで DB 件数が表示されれば「JSが完走している」確認になる
   if (matchStatusEl) matchStatusEl.textContent = `DB: equip=${EQUIP_DB.length}, pet=${PET_DB.length}, acc=${ACC_DB.length}`;
+
   buildEquipSelects();
   buildAccSelects();
   buildPetSelects();

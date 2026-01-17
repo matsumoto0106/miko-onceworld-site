@@ -1,0 +1,10 @@
++++
+id = "magicwand"
+title = "如意棒"
+slot = "weapon"
++++
+
+[base_add]
+spd = 519
+atk = 519
+luk = 219

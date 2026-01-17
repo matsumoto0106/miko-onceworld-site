@@ -1,0 +1,12 @@
++++
+id = "Hellfirefeet"
+title = "獄炎ブーツ"
+slot = "feet"
+series = "Hellfire"
++++
+
+[base_add]
+spd = 140
+atk = 170
+def = 90
+mov = 5

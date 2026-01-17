@@ -1,0 +1,10 @@
++++
+id = "Hellfirehands"
+title = "獄炎アーム"
+slot = "head"
+series = "Hellfire"
++++
+
+[base_add]
+spd = 200
+luk = 130

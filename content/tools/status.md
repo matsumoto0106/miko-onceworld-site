@@ -12,13 +12,13 @@ title: "主人公ステータス・シミュレーター"
 </div>
 
 <div class="grid">
-  <label class="pill">vit <input id="base_vit" type="number" min="1" value="1"></label>
-  <label class="pill">spd <input id="base_spd" type="number" min="1" value="1"></label>
-  <label class="pill">atk <input id="base_atk" type="number" min="1" value="1"></label>
-  <label class="pill">int <input id="base_int" type="number" min="1" value="1"></label>
-  <label class="pill">def <input id="base_def" type="number" min="1" value="1"></label>
-  <label class="pill">mdef <input id="base_mdef" type="number" min="1" value="1"></label>
-  <label class="pill">luk <input id="base_luk" type="number" min="1" value="1"></label>
+  <label class="pill">vit <input id="base_vit" type="number" min="0" value="0"></label>
+  <label class="pill">spd <input id="base_spd" type="number" min="0" value="0"></label>
+  <label class="pill">atk <input id="base_atk" type="number" min="0" value="0"></label>
+  <label class="pill">int <input id="base_int" type="number" min="0" value="0"></label>
+  <label class="pill">def <input id="base_def" type="number" min="0" value="0"></label>
+  <label class="pill">mdef <input id="base_mdef" type="number" min="0" value="0"></label>
+  <label class="pill">luk <input id="base_luk" type="number" min="0" value="0"></label>
 </div>
 
 <hr>
@@ -73,37 +73,37 @@ title: "主人公ステータス・シミュレーター"
   <label class="equip-row">
     <span class="slot">武器</span>
     <select id="select_weapon"></select>
-    <span class="lv">Lv</span><input id="level_weapon" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_weapon" type="number" min="1" value="1">
   </label>
 
   <label class="equip-row">
     <span class="slot">頭</span>
     <select id="select_head"></select>
-    <span class="lv">Lv</span><input id="level_head" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_head" type="number" min="1" value="1">
   </label>
 
   <label class="equip-row">
     <span class="slot">体</span>
     <select id="select_body"></select>
-    <span class="lv">Lv</span><input id="level_body" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_body" type="number" min="1" value="1">
   </label>
 
   <label class="equip-row">
     <span class="slot">腕</span>
     <select id="select_hands"></select>
-    <span class="lv">Lv</span><input id="level_hands" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_hands" type="number" min="1" value="1">
   </label>
 
   <label class="equip-row">
     <span class="slot">足</span>
     <select id="select_feet"></select>
-    <span class="lv">Lv</span><input id="level_feet" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_feet" type="number" min="1" value="1">
   </label>
 
   <label class="equip-row">
     <span class="slot">盾</span>
     <select id="select_shield"></select>
-    <span class="lv">Lv</span><input id="level_shield" type="number" min="0" value="0">
+    <span class="lv">Lv</span><input id="level_shield" type="number" min="1" value="1">
   </label>
 </div>
 

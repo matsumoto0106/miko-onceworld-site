@@ -1,0 +1,10 @@
++++
+id = "test_acc_flat"
+title = "テストアクセ（実数のみ）"
+slot = "accessory"
+series = ""
++++
+
+[base_add]
+atk = 10
+def = 5

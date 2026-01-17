@@ -1,0 +1,8 @@
++++
+id = "sude"
+title = "マイソード"
+slot = "weapon"
++++
+
+[base_add]
+atk = 12

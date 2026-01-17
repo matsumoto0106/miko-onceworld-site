@@ -1,192 +1,403 @@
 // static/js/status-sim.js
-// アクセ3枠対応版（Lv1基礎）
+// 安定版：結果表が消える（JS停止）問題を回避しつつ、アクセ3枠を実装
+//
+// 武器/防具：+0が基礎（×1.0）、+1から補正
+//   実数スケール：基礎×(1+強化×0.1)（mov除外）
+// セット効果：防具5部位が同seriesなら、ステ振り/プロテイン/武器防具に×1.1（切り捨て）
+//
+// アクセ（3枠）：Lv1が基礎（補正なし）
+//   内部強化数 = (Lv - 1)
+//   実数：基礎×(1+内部×0.1) を「(ステ振り+プロテイン+武器防具)の後」に加算
+//   割合：基礎×(1+内部×0.01) を、その後に乗算（1 + %/100）
+//   アクセはセット効果対象外
 
-const STATS = ["vit","spd","atk","int","def","mdef","luk","mov"];
-const BASE_STATS = ["vit","spd","atk","int","def","mdef","luk"];
-const PROTEIN_STATS = ["vit","spd","atk","int","def","mdef","luk"];
-const SCALE_STATS = ["vit","spd","atk","int","def","mdef","luk"];
-const ARMOR_KEYS = ["head","body","hands","feet","shield"];
-const ACCESSORY_KEYS = ["accessory1","accessory2","accessory3"];
+const STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk", "mov"];
+const BASE_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];
+const PROTEIN_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];
+const SCALE_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];
+const ARMOR_KEYS = ["head", "body", "hands", "feet", "shield"];
+const ACCESSORY_KEYS = ["accessory1", "accessory2", "accessory3"];
 
-const $ = (id)=>document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
-/* util */
-const n=(v,f=0)=>Number.isFinite(Number(v))?Number(v):f;
-const clamp0=(v)=>Math.max(0,n(v,0));
-const clamp1=(v)=>Math.max(1,n(v,1));
+/* ---------- util ---------- */
+const n = (v, fb = 0) => (Number.isFinite(Number(v)) ? Number(v) : fb);
+const clamp0 = (v) => Math.max(0, n(v, 0));
+const clamp1 = (v) => Math.max(1, n(v, 1));
 
-const makeZeroStats=()=>Object.fromEntries(STATS.map(k=>[k,0]));
-const addStats=(a,b)=>{const o={...a};for(const k of STATS)o[k]=(o[k]||0)+(b?.[k]||0);return o;}
-const mulStatsFloor=(s,m)=>{const o=makeZeroStats();for(const k of STATS)o[k]=Math.floor((s?.[k]||0)*m);return o;}
-
-/* paths */
-function getBase(){
-  const s=document.currentScript.src;
-  return new URL(s,location.href).origin + s.replace(/^.*\/js\/status-sim\.js$/,"");
+function makeZeroStats() {
+  return Object.fromEntries(STATS.map((k) => [k, 0]));
 }
-const BASE=getBase();
-const abs=(p)=>BASE+p;
-
-/* slots */
-const SLOTS=[
-  {key:"weapon",url:"/db/equip/weapon/index.json",dir:"/db/equip/weapon/"},
-  {key:"head",url:"/db/equip/armor/head/index.json",dir:"/db/equip/armor/head/"},
-  {key:"body",url:"/db/equip/armor/body/index.json",dir:"/db/equip/armor/body/"},
-  {key:"hands",url:"/db/equip/armor/hands/index.json",dir:"/db/equip/armor/hands/"},
-  {key:"feet",url:"/db/equip/armor/feet/index.json",dir:"/db/equip/armor/feet/"},
-  {key:"shield",url:"/db/equip/armor/shield/index.json",dir:"/db/equip/armor/shield/"},
-  {key:"accessory",url:"/db/equip/accessory/index.json",dir:"/db/equip/accessory/"},
-];
-
-/* storage */
-const KEY="status_sim_v14_acc3";
-const save=s=>localStorage.setItem(KEY,JSON.stringify(s));
-const load=()=>JSON.parse(localStorage.getItem(KEY)||"{}");
-
-/* fetch */
-const fetchJSON=u=>fetch(u,{cache:"no-store"}).then(r=>r.json());
-const fetchText=u=>fetch(u,{cache:"no-store"}).then(r=>r.text());
-
-/* toml */
-function parseToml(t){
-  const it={base_add:{},base_rate:{}};
-  let sec="";
-  for(const l of t.split(/\r?\n/).map(v=>v.trim())){
-    if(!l||l==="+++"||l.startsWith("#"))continue;
-    const s=l.match(/^\[(.+)\]$/); if(s){sec=s[1];continue;}
-    const m=l.match(/^(\w+)\s*=\s*(.+)$/); if(!m)continue;
-    let v=m[2].replace(/^"|"$|^'|'$/g,"");
-    v=Number.isFinite(Number(v))?Number(v):v;
-    if(sec==="base_add")it.base_add[m[1]]=v;
-    else if(sec==="base_rate")it.base_rate[m[1]]=v;
-    else it[m[1]]=v;
-  }
-  it.id=it.id||it.title;
-  return it;
+function addStats(a, b) {
+  const out = { ...a };
+  for (const k of STATS) out[k] = (out[k] ?? 0) + (b?.[k] ?? 0);
+  return out;
+}
+function mulStatsFloor(stats, mul) {
+  const out = makeZeroStats();
+  for (const k of STATS) out[k] = Math.floor((stats?.[k] ?? 0) * mul);
+  return out;
 }
 
-/* scale */
-function scaleEquip(base,lv){
-  const m=1+clamp0(lv)*0.1;
-  const o=makeZeroStats();
-  for(const k of SCALE_STATS)o[k]=Math.floor((base?.[k]||0)*m);
-  o.mov=base?.mov||0;
-  return o;
-}
-function scaleAccFlat(base,lv){
-  const m=1+(clamp1(lv)-1)*0.1;
-  const o=makeZeroStats();
-  for(const k of STATS)o[k]=Math.floor((base?.[k]||0)*m);
-  return o;
-}
-function scaleAccRate(base,lv){
-  const m=1+(clamp1(lv)-1)*0.01;
-  const o=makeZeroStats();
-  for(const k of STATS)o[k]=(base?.[k]||0)*m;
-  return o;
-}
-function applyRate(s,r){
-  const o=makeZeroStats();
-  for(const k of STATS)o[k]=Math.floor((s[k]||0)*(1+(r[k]||0)/100));
-  return o;
+/* ---------- error ---------- */
+function setErr(text) {
+  const el = $("errBox");
+  if (!el) return;
+  const msg = (text || "").trim();
+  el.textContent = msg;
+  el.classList.toggle("is-visible", msg.length > 0);
 }
 
-/* set */
-function getSet(items,state){
-  let s=null;
-  for(const k of ARMOR_KEYS){
-    const id=state[k]?.id; if(!id)return null;
-    const it=(items[k]||[]).find(v=>v.id===id); if(!it?.series)return null;
-    if(s===null)s=it.series; else if(s!==it.series)return null;
-  }
-  return s;
+/* ---------- GitHub Pages 対応（安定版） ---------- */
+function getAssetBaseUrl() {
+  const s = document.currentScript;
+  if (!s?.src) return location.origin;
+  const u = new URL(s.src, location.href);
+  const basePath = u.pathname.replace(/\/js\/status-sim\.js$/, "");
+  return `${u.origin}${basePath}`;
+}
+const ASSET_BASE = getAssetBaseUrl();
+const abs = (p) => `${ASSET_BASE}${p}`;
+
+/* ---------- fetch ---------- */
+async function fetchJSON(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`404: ${url}`);
+  return await res.json();
+}
+async function fetchText(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`404: ${url}`);
+  return await res.text();
 }
 
-/* table */
-function build(){
-  const tb=$("statsTbody"); tb.innerHTML="";
-  for(const k of STATS){
-    tb.insertAdjacentHTML("beforeend",
-      `<tr data-k="${k}">
-        <td>${k}</td><td class="num b"></td><td class="num e"></td><td class="num t"></td>
-      </tr>`);
-  }
-}
-function render(b,e,t){
-  for(const tr of $("statsTbody").children){
-    const k=tr.dataset.k;
-    tr.querySelector(".b").textContent=b[k]||0;
-    tr.querySelector(".e").textContent=e[k]||0;
-    tr.querySelector(".t").textContent=t[k]||0;
-  }
-}
+/* ---------- TOML簡易（base_add / base_rate） ---------- */
+function parseMiniToml(text) {
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && l !== "+++" && !l.startsWith("#"));
 
-/* main */
-document.addEventListener("DOMContentLoaded",async()=>{
-  build();
-  const saved=load();
-  const items={};
+  const item = { base_add: {}, base_rate: {} };
+  let section = "";
 
-  for(const s of SLOTS){
-    items[s.key]=[];
-    const sel=$(`select_${s.key}`); // weapon等
-    if(!sel)continue;
-
-    const files=await fetchJSON(abs(s.url));
-    for(const f of files){
-      items[s.key].push(parseToml(await fetchText(abs(s.dir+f))));
-    }
-    sel.innerHTML=`<option value="">（なし）</option>`+
-      items[s.key].map(i=>`<option value="${i.id}">${i.title||i.id}</option>`).join("");
-  }
-
-  function recalc(){
-    const base=makeZeroStats();
-    for(const k of BASE_STATS)base[k]=clamp0($(`base_${k}`)?.value);
-
-    const protRaw=makeZeroStats();
-    for(const k of PROTEIN_STATS)protRaw[k]=clamp0($(`protein_${k}`)?.value);
-    const shaker=clamp0($("shakerCount")?.value);
-    const prot=mulStatsFloor(protRaw,1+shaker*0.01);
-
-    let equip=makeZeroStats();
-    const state={};
-
-    for(const s of ["weapon","head","body","hands","feet","shield"]){
-      const id=$(`select_${s}`).value;
-      const lv=clamp0($(`level_${s}`).value);
-      state[s]={id,lv};
-      if(!id)continue;
-      const it=items[s].find(v=>v.id===id);
-      equip=addStats(equip,scaleEquip(it.base_add,lv));
+  for (const line of lines) {
+    const sec = line.match(/^\[(.+?)\]$/);
+    if (sec) {
+      section = sec[1];
+      continue;
     }
 
-    const setMul=getSet(items,state)?1.1:1;
-    const baseP=setMul===1?base:mulStatsFloor(base,setMul);
-    const protP=setMul===1?prot:mulStatsFloor(prot,setMul);
-    const equipP=setMul===1?equip:mulStatsFloor(equip,setMul);
+    const kv = line.match(/^([A-Za-z0-9_]+)\s*=\s*(.+)$/);
+    if (!kv) continue;
 
-    let sum=addStats(addStats(baseP,protP),equipP);
+    const key = kv[1];
+    let raw = kv[2].trim();
+    if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
 
-    let accFlat=makeZeroStats();
-    let accRate=makeZeroStats();
+    const value = Number.isFinite(Number(raw)) ? Number(raw) : raw;
 
-    for(const i of ACCESSORY_KEYS){
-      const id=$(`select_${i}`)?.value;
-      const lv=clamp1($(`level_${i}`)?.value);
-      if(!id)continue;
-      const it=items.accessory.find(v=>v.id===id);
-      accFlat=addStats(accFlat,scaleAccFlat(it.base_add,lv));
-      accRate=addStats(accRate,scaleAccRate(it.base_rate,lv));
-    }
-
-    sum=addStats(sum,accFlat);
-    const total=applyRate(sum,accRate);
-
-    render(addStats(baseP,protP),addStats(equipP,accFlat),total);
-    save({});
+    if (section === "base_add") item.base_add[key] = Number.isFinite(Number(value)) ? Number(value) : 0;
+    else if (section === "base_rate") item.base_rate[key] = Number.isFinite(Number(value)) ? Number(value) : 0;
+    else item[key] = value;
   }
 
-  document.querySelectorAll("input,select").forEach(e=>e.addEventListener("input",recalc));
+  item.id = item.id || item.title || "unknown";
+  return item;
+}
+
+/* ---------- スケール ---------- */
+// 武器/防具：+0基礎、movはスケール対象外
+function scaleEquipBaseAdd(baseAdd, enhance) {
+  const lv = clamp0(enhance);
+  const mul = 1 + lv * 0.1;
+
+  const out = makeZeroStats();
+  for (const k of SCALE_STATS) out[k] = Math.floor((baseAdd?.[k] ?? 0) * mul);
+  out.mov = baseAdd?.mov ?? 0;
+  return out;
+}
+
+// アクセ実数：Lv1基礎（内部=Lv-1）
+function scaleAccFlatLv1Base(baseAdd, displayLv) {
+  const internal = clamp1(displayLv) - 1;
+  const mul = 1 + internal * 0.1;
+
+  const out = makeZeroStats();
+  for (const k of STATS) out[k] = Math.floor((baseAdd?.[k] ?? 0) * mul);
+  return out;
+}
+
+// アクセ割合(%): Lv1基礎（内部=Lv-1）
+function scaleAccRatePercentLv1Base(baseRate, displayLv) {
+  const internal = clamp1(displayLv) - 1;
+  const mul = 1 + internal * 0.01;
+
+  const out = makeZeroStats();
+  for (const k of STATS) out[k] = (baseRate?.[k] ?? 0) * mul; // 小数OK
+  return out;
+}
+
+function applyRateToStatsFloor(stats, ratePercentByStat) {
+  const out = makeZeroStats();
+  for (const k of STATS) {
+    const p = ratePercentByStat?.[k] ?? 0;
+    out[k] = Math.floor((stats?.[k] ?? 0) * (1 + p / 100));
+  }
+  return out;
+}
+
+/* ---------- セット判定 ---------- */
+function getArmorSetSeries(slotItems, equipState) {
+  let series = null;
+  for (const key of ARMOR_KEYS) {
+    const id = equipState?.[key]?.id || "";
+    if (!id) return null;
+
+    const item = (slotItems[key] || []).find((it) => it.id === id);
+    if (!item) return null;
+
+    const s = String(item.series ?? "").trim();
+    if (!s) return null;
+
+    if (series === null) series = s;
+    if (series !== s) return null;
+  }
+  return series;
+}
+
+/* ---------- UI ---------- */
+function fillSelect(selectEl, items) {
+  if (!selectEl) return;
+  selectEl.innerHTML = "";
+  selectEl.append(new Option("（なし）", ""));
+  for (const it of items) selectEl.append(new Option(it.title ?? it.id, it.id));
+}
+
+function buildTableRows() {
+  const tbody = $("statsTbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  for (const k of STATS) {
+    const tr = document.createElement("tr");
+    tr.dataset.stat = k;
+    tr.innerHTML = `
+      <td>${k}</td>
+      <td class="num" data-col="base"></td>
+      <td class="num" data-col="equip"></td>
+      <td class="num" data-col="total"></td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderTable(basePlusProtein, equipDisplay, total) {
+  const tbody = $("statsTbody");
+  if (!tbody) return;
+
+  for (const tr of tbody.querySelectorAll("tr")) {
+    const k = tr.dataset.stat;
+    tr.querySelector('[data-col="base"]').textContent = String(basePlusProtein?.[k] ?? 0);
+    tr.querySelector('[data-col="equip"]').textContent = String(equipDisplay?.[k] ?? 0);
+    tr.querySelector('[data-col="total"]').textContent = String(total?.[k] ?? 0);
+  }
+}
+
+/* ---------- 保存 ---------- */
+const STORAGE_KEY = "status_sim_state_acc3_lv1base";
+const saveState = (s) => localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+const loadState = () => {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+  catch { return {}; }
+};
+const clearState = () => localStorage.removeItem(STORAGE_KEY);
+
+/* ---------- main ---------- */
+document.addEventListener("DOMContentLoaded", async () => {
+  setErr("");
+  buildTableRows();
+
+  const saved = loadState();
+
+  // DBロード先
+  const SLOTS = [
+    { key: "weapon", indexUrl: "/db/equip/weapon/index.json", itemDir: "/db/equip/weapon/" },
+    { key: "head", indexUrl: "/db/equip/armor/head/index.json", itemDir: "/db/equip/armor/head/" },
+    { key: "body", indexUrl: "/db/equip/armor/body/index.json", itemDir: "/db/equip/armor/body/" },
+    { key: "hands", indexUrl: "/db/equip/armor/hands/index.json", itemDir: "/db/equip/armor/hands/" },
+    { key: "feet", indexUrl: "/db/equip/armor/feet/index.json", itemDir: "/db/equip/armor/feet/" },
+    { key: "shield", indexUrl: "/db/equip/armor/shield/index.json", itemDir: "/db/equip/armor/shield/" },
+    { key: "accessory", indexUrl: "/db/equip/accessory/index.json", itemDir: "/db/equip/accessory/" },
+  ];
+
+  const slotItems = {};
+  const loadErrors = [];
+
+  // DB読み込み
+  for (const s of SLOTS) {
+    slotItems[s.key] = [];
+    try {
+      const files = await fetchJSON(abs(s.indexUrl));
+      const items = [];
+      for (const f of files) {
+        const toml = await fetchText(abs(`${s.itemDir}${f}`));
+        items.push(parseMiniToml(toml));
+      }
+      slotItems[s.key] = items;
+    } catch (e) {
+      loadErrors.push(`${s.key}: ${String(e?.message ?? e)}`);
+    }
+  }
+
+  // selectの反映（武器防具）
+  for (const key of ["weapon", "head", "body", "hands", "feet", "shield"]) {
+    fillSelect($(`select_${key}`), slotItems[key] || []);
+    const sel = $(`select_${key}`);
+    const lv = $(`level_${key}`);
+    if (sel) sel.value = saved?.equip?.[key]?.id ?? "";
+    if (lv) lv.value = String(clamp0(saved?.equip?.[key]?.lv ?? 0));
+  }
+
+  // selectの反映（アクセ3枠：同じDBを使う）
+  for (const akey of ACCESSORY_KEYS) {
+    fillSelect($(`select_${akey}`), slotItems.accessory || []);
+    const sel = $(`select_${akey}`);
+    const lv = $(`level_${akey}`);
+    if (sel) sel.value = saved?.equip?.[akey]?.id ?? "";
+    if (lv) lv.value = String(clamp1(saved?.equip?.[akey]?.lv ?? 1));
+  }
+
+  // 振り分け・プロテイン復元（存在しない場合もあるので安全に）
+  if ($("basePointTotal")) $("basePointTotal").value = String(clamp0(saved?.basePointTotal ?? 0));
+  for (const k of BASE_STATS) {
+    const el = $(`base_${k}`);
+    if (el) el.value = String(clamp0(saved?.basePoints?.[k] ?? 0));
+  }
+  if ($("shakerCount")) $("shakerCount").value = String(clamp0(saved?.shakerCount ?? 0));
+  for (const k of PROTEIN_STATS) {
+    const el = $(`protein_${k}`);
+    if (el) el.value = String(clamp0(saved?.proteinRaw?.[k] ?? 0));
+  }
+
+  // ボタン
+  $("recalcBtn")?.addEventListener("click", recalc);
+  $("resetBtn")?.addEventListener("click", () => {
+    for (const k of BASE_STATS) {
+      const el = $(`base_${k}`);
+      if (el) el.value = "0";
+    }
+    recalc();
+  });
+  $("clearSaveBtn")?.addEventListener("click", () => {
+    clearState();
+    // UI初期化（安全）
+    if ($("basePointTotal")) $("basePointTotal").value = "0";
+    for (const k of BASE_STATS) if ($(`base_${k}`)) $(`base_${k}`).value = "0";
+    if ($("shakerCount")) $("shakerCount").value = "0";
+    for (const k of PROTEIN_STATS) if ($(`protein_${k}`)) $(`protein_${k}`).value = "0";
+
+    for (const key of ["weapon","head","body","hands","feet","shield"]) {
+      if ($(`select_${key}`)) $(`select_${key}`).value = "";
+      if ($(`level_${key}`)) $(`level_${key}`).value = "0";
+    }
+    for (const akey of ACCESSORY_KEYS) {
+      if ($(`select_${akey}`)) $(`select_${akey}`).value = "";
+      if ($(`level_${akey}`)) $(`level_${akey}`).value = "1";
+    }
+    recalc();
+  });
+
+  // すべてのinput/selectで再計算
+  document.querySelectorAll("input,select").forEach((el) => {
+    el.addEventListener("input", recalc);
+    el.addEventListener("change", recalc);
+  });
+
+  function recalc() {
+    const errs = [];
+    if (loadErrors.length) errs.push(...loadErrors);
+
+    const basePointTotal = clamp0($("basePointTotal")?.value);
+
+    const basePointsRaw = makeZeroStats();
+    for (const k of BASE_STATS) basePointsRaw[k] = clamp0($(`base_${k}`)?.value);
+    basePointsRaw.mov = 0;
+
+    const shaker = clamp0($("shakerCount")?.value);
+    const proteinRaw = makeZeroStats();
+    for (const k of PROTEIN_STATS) proteinRaw[k] = clamp0($(`protein_${k}`)?.value);
+
+    const proteinAppliedRaw = mulStatsFloor(proteinRaw, 1 + shaker * 0.01);
+
+    // 武器防具（スケール込み）
+    let equipSumRaw = makeZeroStats();
+    const equipState = {};
+
+    for (const key of ["weapon","head","body","hands","feet","shield"]) {
+      const id = $(`select_${key}`)?.value || "";
+      const lv = clamp0($(`level_${key}`)?.value);
+      equipState[key] = { id, lv };
+
+      if (!id) continue;
+      const it = (slotItems[key] || []).find((v) => v.id === id);
+      if (!it) continue;
+      equipSumRaw = addStats(equipSumRaw, scaleEquipBaseAdd(it.base_add ?? {}, lv));
+    }
+
+    // セット効果（防具5部位）
+    const setSeries = getArmorSetSeries(slotItems, equipState);
+    const setMul = setSeries ? 1.1 : 1.0;
+
+    // ポイント残り（表示だけ）
+    const used = BASE_STATS.reduce((s, k) => s + (basePointsRaw[k] ?? 0), 0);
+    const remain = basePointTotal - used;
+    const info = $("basePointInfo");
+    if (info) info.textContent = setSeries ? `使用 ${used} / 残り ${remain}（セットON）` : `使用 ${used} / 残り ${remain}`;
+    if (remain < 0) errs.push(`ポイント超過：残り ${remain}`);
+
+    // セット効果は「ステ振り/プロテイン/武器防具」のみ
+    const basePoints = setMul === 1.0 ? basePointsRaw : mulStatsFloor(basePointsRaw, setMul);
+    const proteinApplied = setMul === 1.0 ? proteinAppliedRaw : mulStatsFloor(proteinAppliedRaw, setMul);
+    const equipSum = setMul === 1.0 ? equipSumRaw : mulStatsFloor(equipSumRaw, setMul);
+
+    const basePlusProtein = addStats(basePoints, proteinApplied);
+    const sumBeforeAcc = addStats(basePlusProtein, equipSum);
+
+    // アクセ3枠（実数→加算 / 割合→最後に乗算）
+    let accFlat = makeZeroStats();
+    let accRate = makeZeroStats();
+
+    for (const akey of ACCESSORY_KEYS) {
+      const id = $(`select_${akey}`)?.value || "";
+      const lv = clamp1($(`level_${akey}`)?.value); // Lv1基礎
+      equipState[akey] = { id, lv };
+
+      if (!id) continue;
+      const it = (slotItems.accessory || []).find((v) => v.id === id);
+      if (!it) continue;
+
+      accFlat = addStats(accFlat, scaleAccFlatLv1Base(it.base_add ?? {}, lv));
+      accRate = addStats(accRate, scaleAccRatePercentLv1Base(it.base_rate ?? {}, lv));
+    }
+
+    const sumAfterFlat = addStats(sumBeforeAcc, accFlat);
+    const total = applyRateToStatsFloor(sumAfterFlat, accRate);
+
+    // 表示用：装備列には「武器防具＋アクセ実数」を出す（割合は合計に反映）
+    const equipDisplay = addStats(equipSum, accFlat);
+
+    setErr(errs.join("\n"));
+    renderTable(basePlusProtein, equipDisplay, total);
+
+    saveState({
+      basePointTotal,
+      basePoints: Object.fromEntries(BASE_STATS.map((k) => [k, basePointsRaw[k] ?? 0])),
+      shakerCount: shaker,
+      proteinRaw: Object.fromEntries(PROTEIN_STATS.map((k) => [k, proteinRaw[k] ?? 0])),
+      equip: equipState,
+    });
+  }
+
   recalc();
 });

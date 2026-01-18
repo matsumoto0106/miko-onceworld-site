@@ -1,13 +1,14 @@
 // static/js/status-sim.js
 // 検証用（段階）
-// - 表示：常に整数（小数点以下を捨てる）
+// - 表示：常に整数（小数点以下を捨てる）※floorSafeで誤差対策
 // - 内部切り捨て：
 //   (1) 武器/防具の強化スケールは「装備ごとに floorSafe」（movは強化しない）
 //   (2) セット効果は「(基礎+プロテイン+武器防具) を合算してから」
 //       vit/spd/atk/int/def/mdef/luk にだけ×1.1して floorSafe（movは対象外）
 // - それ以外（シェイカー、アクセ、ペット、％適用）は内部切り捨てなし（小数保持）
 //
-// ★ポイント：JS浮動小数の誤差（109.999999999...）で -1 が出るのを避けるため、floorSafe を使用
+// ★変更点（今回）
+// 表示の整数化も floorSafe を使う（xxx.999999999 による -1 を潰す）
 
 const STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk", "mov"];
 const BASE_STATS = ["vit", "spd", "atk", "int", "def", "mdef", "luk"];
@@ -42,13 +43,13 @@ function mulStats(stats, mul) {
 
 // ★浮動小数誤差対策：floor直前に微小値を足す
 function floorSafe(x) {
-  return Math.floor((Number(x) || 0) + 1e-9);
+  return Math.floor((Number(x) || 0) + 1e-6);
 }
 
 /* ---------- 表示：整数（小数点以下切り捨て） ---------- */
+// ★表示も floorSafe を使う
 function toDisplayIntFloor(v) {
-  const x = Number(v);
-  return Number.isFinite(x) ? Math.floor(x) : 0;
+  return floorSafe(v);
 }
 function statsToDisplayIntsFloor(stats) {
   const out = makeZeroStats();
@@ -364,36 +365,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   $("recalcBtn")?.addEventListener("click", recalc);
-  $("resetBtn")?.addEventListener("click", () => {
-    for (const k of BASE_STATS) {
-      const el = $(`base_${k}`);
-      if (el) el.value = "0";
-    }
-    recalc();
-  });
-  $("clearSaveBtn")?.addEventListener("click", () => {
-    clearState();
-
-    if ($("basePointTotal")) $("basePointTotal").value = "0";
-    for (const k of BASE_STATS) if ($(`base_${k}`)) $(`base_${k}`).value = "0";
-    if ($("shakerCount")) $("shakerCount").value = "0";
-    for (const k of PROTEIN_STATS) if ($(`protein_${k}`)) $(`protein_${k}`).value = "0";
-
-    for (const key of ["weapon", "head", "body", "hands", "feet", "shield"]) {
-      if ($(`select_${key}`)) $(`select_${key}`).value = "";
-      if ($(`level_${key}`)) $(`level_${key}`).value = "0";
-    }
-    for (const akey of ACCESSORY_KEYS) {
-      if ($(`select_${akey}`)) $(`select_${akey}`).value = "";
-      if ($(`level_${akey}`)) $(`level_${akey}`).value = "1";
-    }
-    for (const k of PET_KEYS) {
-      if ($(`select_${k}`)) $(`select_${k}`).value = "";
-      if ($(`stage_${k}`)) $(`stage_${k}`).value = "0";
-    }
-
-    recalc();
-  });
 
   document.querySelectorAll("input,select").forEach((el) => {
     el.addEventListener("input", recalc);
@@ -437,7 +408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const setSeries = getArmorSetSeries(slotItems, equipState);
     const setMul = setSeries ? 1.1 : 1.0;
 
-    // ポイント表示
+    // ポイント表示（そのまま）
     const used = BASE_STATS.reduce((s, k) => s + (basePointsRaw[k] ?? 0), 0);
     const remain = basePointTotal - used;
     const info = $("basePointInfo");
@@ -448,7 +419,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const sumBeforeSet = addStats(addStats(basePointsRaw, proteinAppliedRaw), equipSumRaw);
     const sumAfterSet = applySetAfterSumFloor(sumBeforeSet, setMul);
 
-    // テーブルの base列表示（現状は「基礎+プロテイン」）
+    // base列表示（基礎+プロテイン）
     const basePlusProtein = addStats(basePointsRaw, proteinAppliedRaw);
 
     // アクセ（内部切り捨て無し）
@@ -471,14 +442,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ペット（内部切り捨て無し）
     let petFlat = makeZeroStats();
     let petRate = makeZeroStats();
-
-    const petsState = {};
     for (const pk of PET_KEYS) {
       const pid = $(`select_${pk}`)?.value || "";
       const stage = clampStage($(`stage_${pk}`)?.value);
-      petsState[pk] = { id: pid, stage };
-
       if (!pid || stage <= 0) continue;
+
       const pet = petList.find((p) => p.id === pid);
       if (!pet) continue;
 
@@ -492,20 +460,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totalRate = addStats(accRate, petRate);
     const total = applyRateToStats(sumAfterFlat, totalRate);
 
-    // 装備列表示（武器防具 + アクセ実数 + ペット実数）
     const equipDisplay = addStats(addStats(equipSumRaw, accFlat), petFlat);
 
     setErr(errs.join("\n"));
     renderTable(basePlusProtein, equipDisplay, total);
-
-    saveState({
-      basePointTotal,
-      basePoints: Object.fromEntries(BASE_STATS.map((k) => [k, basePointsRaw[k] ?? 0])),
-      shakerCount: shaker,
-      proteinRaw: Object.fromEntries(PROTEIN_STATS.map((k) => [k, proteinRaw[k] ?? 0])),
-      equip: equipState,
-      pets: petsState,
-    });
   }
 
   recalc();

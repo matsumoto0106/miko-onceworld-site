@@ -1716,7 +1716,9 @@
           "final_rate": {}
         },
         {
-          "base_add": {},
+          "base_add": {
+            "def": 2000
+          },
           "base_rate": {},
           "final_rate": {}
         },

@@ -1617,7 +1617,7 @@
       ]
     },
     {
-      "id": "71",
+      "id": "72",
       "name": "ネクロプリンセス",
       "stages": [
         {
@@ -1652,7 +1652,7 @@
       ]
     },
     {
-      "id": "72",
+      "id": "73",
       "name": "朽ちざる竜骸　イゾ",
       "stages": [
         {
@@ -1677,12 +1677,16 @@
         {
           "base_add": {},
           "base_rate": {},
-          "final_rate": {}
+          "final_rate": {
+            "atk":1
+          }
         },
         {
           "base_add": {},
           "base_rate": {},
-          "final_rate": {}
+          "final_rate": {
+            "atk":57
+          }
         }
       ]
     },
@@ -2104,7 +2108,9 @@
         },
         {
           "base_add": {},
-          "base_rate": {},
+          "base_rate": {
+            "def":45
+          },
           "final_rate": {}
         }
       ]
@@ -2142,7 +2148,9 @@
         {
           "base_add": {},
           "base_rate": {},
-          "final_rate": {}
+          "final_rate": {
+            "spd":15
+          }
         }
       ]
     },
@@ -2679,7 +2687,9 @@
         },
         {
           "base_add": {},
-          "base_rate": {},
+          "base_rate": {
+            "atk": 60
+          },
           "final_rate": {}
         },
         {
@@ -2707,7 +2717,9 @@
         },
         {
           "base_add": {},
-          "base_rate": {},
+          "base_rate": {
+            "int": 60
+          },
           "final_rate": {}
         },
         {

@@ -2185,12 +2185,16 @@
         },
         {
           "base_add": {},
-          "base_rate": {},
+          "base_rate": {
+            "atk": 15
+          },
           "final_rate": {}
         },
         {
           "base_add": {},
-          "base_rate": {},
+          "base_rate": {
+            "atk": 40
+          },
           "final_rate": {}
         }
       ]

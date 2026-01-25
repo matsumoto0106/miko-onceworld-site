@@ -1,0 +1,7 @@
++++
+id = "acc_def_knight_doctrine"
+title = "騎士の心得"
++++
+
+[base_rate]
+def = 15

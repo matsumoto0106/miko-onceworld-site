@@ -1,0 +1,10 @@
++++
+id = "acc_atk_blood_tonic"
+title = "ブラッドトニック"
++++
+
+[base_add]
+atk = 90
+
+[base_rate]
+atk = 5

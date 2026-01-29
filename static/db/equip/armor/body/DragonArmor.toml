@@ -1,0 +1,12 @@
++++
+id = "DragonArmor
+"
+title = "ドラゴンアーマー"
+slot = "body"
+series = "Dragon"
++++
+
+[base_add]
+vit = 750
+def = 650
+mdef = 450

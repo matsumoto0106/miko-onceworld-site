@@ -85,21 +85,21 @@ title: "主人公ステータス・シミュレーター"
   </div>
 
   <div class="equip-row">
-    <div class="slot">体</div>
+    <div class="slot">服</div>
     <div class="main"><select id="select_body"></select></div>
     <div class="lvtag">+</div>
     <div class="lvbox"><input id="level_body" type="number" min="0" value="0"></div>
   </div>
 
   <div class="equip-row">
-    <div class="slot">腕</div>
+    <div class="slot">手</div>
     <div class="main"><select id="select_hands"></select></div>
     <div class="lvtag">+</div>
     <div class="lvbox"><input id="level_hands" type="number" min="0" value="0"></div>
   </div>
 
   <div class="equip-row">
-    <div class="slot">足</div>
+    <div class="slot">脚</div>
     <div class="main"><select id="select_feet"></select></div>
     <div class="lvtag">+</div>
     <div class="lvbox"><input id="level_feet" type="number" min="0" value="0"></div>

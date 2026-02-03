@@ -43,6 +43,12 @@
 
       <label for="monster-level">Lv</label>
       <input type="number" id="monster-level" value="1" min="1">
+
+      <!-- ★追加：起源チェック（基礎獲得経験値×2） -->
+      <label class="origin-toggle" style="display:inline-flex;align-items:center;gap:6px;margin-left:10px;">
+        <input type="checkbox" id="origin-toggle">
+        起源
+      </label>
     </div>
 
     <!-- ステータス（ひとかたまり） -->
@@ -146,7 +152,7 @@
   </section>
   {{ end }}
 
-  <!-- ★ fmt() を使えるように先に読み込む -->
+  <!-- fmt() を使えるように先に読み込む -->
   <script src="{{ "js/utils/format.js" | relURL }}"></script>
   <script src="{{ "js/status-calc.js" | relURL }}"></script>
   <script src="{{ "js/level-shortcuts.js" | relURL }}"></script>

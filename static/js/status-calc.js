@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const levelInputElement = document.getElementById("monster-level");
   if (!levelInputElement) return;
 
+  // ★追加：起源チェック
+  const originToggle = document.getElementById("origin-toggle");
+
   // 表示専用：fmt() が無い環境でも壊れない
   const fmtSafe = (v) => {
     try {
@@ -38,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function recalcInfoByLevel() {
     const currentLevel = parseInt(levelInputElement.value, 10) || 1;
+    const originOn = !!originToggle?.checked; // ★起源ON/OFF
 
     infoValueElements.forEach((infoEl) => {
       const statType = infoEl.dataset.stat;
@@ -45,10 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (statType !== "exp") return;
 
+      // ★起源：基礎経験値×2
+      const baseExp = originOn ? baseValue * 2 : baseValue;
+
       // 獲得EXP ＝ 基礎経験値 × floor( max(1, 0.2 × Lv^1.1) )
       const rawScale = 0.2 * Math.pow(currentLevel, 1.1);
       const scale = Math.floor(Math.max(1, rawScale));
-      const exp = baseValue * scale;
+
+      const exp = baseExp * scale;
 
       infoEl.textContent = fmtSafe(exp);
     });
@@ -64,4 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // input + change（ショートカット/スマホ対策）
   levelInputElement.addEventListener("input", recalcAllByLevel);
   levelInputElement.addEventListener("change", recalcAllByLevel);
+
+  // ★追加：起源チェックの変更でも再計算
+  originToggle?.addEventListener("change", recalcAllByLevel);
 });

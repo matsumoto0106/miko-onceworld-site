@@ -47,9 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // EXPのみ計算
       if (statType === "exp") {
-        const calculatedExp = baseValue * (1 + Math.floor((currentLevel - 1) * 0.1)); // 仮式
-        const v = Math.floor(calculatedExp);
+  const lv = currentLevel;
+  const baseExp = baseValue;
 
+  const rawScale = 0.2 * Math.pow(lv, 1.1);
+  const scaleWithMin = Math.max(1, rawScale);
+  const scale = Math.floor(scaleWithMin);
+
+  const exp = baseExp * scale;
+
+  infoEl.textContent = fmtSafe(exp);
+}
+      
         // ★表示だけカンマ
         infoEl.textContent = fmtSafe(v);
       }

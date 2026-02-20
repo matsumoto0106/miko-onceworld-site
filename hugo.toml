@@ -1,4 +1,4 @@
-baseURL = "https://matsumoto0106.github.io/miko-onceworld-site/"
+baseURL = "https://mikotorei.github.io/miko-onceworld-site/"
 publishDir = "docs"
 relativeURLs = false
 canonifyURLs = true

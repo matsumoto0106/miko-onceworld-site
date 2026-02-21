@@ -1,0 +1,9 @@
++++
+id = "Azure"
+title = "アズールワンド"
+slot = "weapon"
++++
+
+[base_add]
+int = 323
+mdef = 223
